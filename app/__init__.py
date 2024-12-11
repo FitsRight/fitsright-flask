@@ -26,22 +26,10 @@ def create_app():
 
     with app.app_context():
         # Register Blueprints
-        from app.urls.root.root_url import root_url
-        from app.urls.auth.auth_url import auth_url
-        from app.urls.bookings.bookings_url import bookings_url
-        from app.urls.admin.admin import admin_url
+       
         from app.urls.home.home_url import home_url
-        from app.urls.admin.scheduler import scheduler_
-
-        app.register_blueprint(root_url)
-        app.register_blueprint(auth_url)
-        app.register_blueprint(bookings_url)
-        app.register_blueprint(admin_url)
+ 
         app.register_blueprint(home_url)
-        app.register_blueprint(scheduler_)
-
-        from app.models.pets.pets_model import Pet
-        from app.models.products.products_model import Booking, Product
 
         # Create Database Models
         db.create_all()
