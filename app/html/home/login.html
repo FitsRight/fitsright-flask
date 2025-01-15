@@ -1,0 +1,91 @@
+{% extends "/masterpage/external.html" %}
+{% block content %}
+<meta name="theme-color" content="#7952b3">
+<div class="container mt-5 mb-5">
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+  </style>
+
+  <!-- Custom styles for this template -->
+  <!-- <link href="signin.css" rel="stylesheet"> -->
+  </head>
+
+  <body class="text-center">
+
+    <main class="form-signin mt-3">
+      <form>
+        <img class="mb-4" src="/static/images/fits_right_icon.png" alt="img-fluid" width="160">
+        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+
+        <div class="form-floating mb-3">
+          <input id="txtUsername" type="email" class="form-control bg-white" id="floatingInput"
+            placeholder="name@example.com">
+          <label for="floatingInput">Email address</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input id="txtPassword" type="password" class="form-control bg-white" id="floatingPassword"
+            placeholder="Password">
+          <label for="floatingPassword">Password</label>
+        </div>
+        <button class="w-100 btn btn-lg btn-primary fitrightcolor_button" type="button" onclick="login();">Sign
+          in</button>
+      </form>
+
+</div>
+<script>
+  function login() {
+    loginUser("test@example.com", "password123");
+  }
+  // JavaScript function to call the Flask API
+  async function loginUser(userEmail, userPassword) {
+    const apiUrl = "/login_check"; // URL of your Flask API
+
+    const payload = {
+      user_email: document.getElementById("txtUsername").value,
+      user_password: document.getElementById("txtPassword").value,
+      onesignal_id: ''
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        console.log("Login Successful:", data);
+        // Redirect to the dashboard
+        window.location.href = '/admin/dashboard';
+      } else {
+        // Log error or display a message to the user
+        console.log("Login Failed:", response.statusText);
+        // Optionally, display a message to the user:
+        alert("Login failed, please try again.");
+      }
+    } catch (error) {
+      console.error("Network Error:", error);
+    }
+  }
+
+  // Example usage of the function
+
+
+</script>
+{% endblock %}

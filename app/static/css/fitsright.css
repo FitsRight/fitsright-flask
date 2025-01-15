@@ -1,0 +1,34 @@
+html{
+    font-family: sans-serif !important;
+    font-weight: bold;
+}
+
+.fitrightcolor{
+    color: #3541A5;
+}
+
+.fitrightcolor_button{
+    background-color: #3541A5;
+}
+
+.Hero {
+    background-color: rgba(53, 65, 165, 0.65); /* Blue color with 65% opacity */
+    background-image: 
+        linear-gradient(rgba(53, 65, 165, 0.65), rgba(53, 65, 165, 0.65)),
+        url('/static/images/fits_right_hero.jpg');
+    background-blend-mode: multiply;
+    background-position: center;
+    background-size: cover;
+    color: white;
+}
+
+.footer {
+    background-color: rgba(53, 65, 165, 0.65); /* Blue color with 65% opacity */
+    background-image: 
+        linear-gradient(rgba(53, 65, 165, 0.65), rgba(53, 65, 165, 0.65)),
+        url('/static/images/fits_right_footer.jpg');
+    background-blend-mode: multiply;
+    background-position: center;
+    background-size: cover;
+    color: white;
+}

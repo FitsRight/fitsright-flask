@@ -1,0 +1,115 @@
+{% extends "/masterpage/admin.html" %}
+{% block content %}
+<div class="mt-5 container">
+    <!-- <div class="d-flex bd-highlight">
+        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Retailers</div>
+        <div class="p-2 bd-highlight">
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+        </div>
+    </div> -->
+
+    <div class="row">
+        <div class="col-12 col-md-6 col-xl-4">
+            <canvas id="myBarChart" width="400" height="200"></canvas>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4">
+            <canvas id="myBarChart2" width="400" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        // loaddata();
+    });
+
+    // Get the canvas element
+    const ctx = document.getElementById('myBarChart').getContext('2d');
+
+    // Create a new bar chart
+    const myBarChart = new Chart(ctx, {
+        type: 'bar', // Specify the chart type
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May'], // X-axis labels
+            datasets: [{
+                label: 'User Signups',
+                data: [12, 19, 3, 5, 2], // Y-axis data points
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)', // Colors for each bar
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)', // Border colors
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1 // Border width
+            }]
+        },
+        options: {
+            responsive: true, // Make it responsive
+            scales: {
+                y: {
+                    beginAtZero: true // Ensure Y-axis starts at 0
+                }
+            }
+        }
+    });
+
+    // Get the canvas element
+    const ctx2 = document.getElementById('myBarChart2').getContext('2d');
+
+    // Create a new bar chart
+    const myBarChart2 = new Chart(ctx2, {
+        type: 'bar', // Specify the chart type
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May'], // X-axis labels
+            datasets: [{
+                label: 'Scans Purchased',
+                data: [4, 12, 3, 26, 34], // Y-axis data points
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)', // Colors for each bar
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)', // Border colors
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1 // Border width
+            }]
+        },
+        options: {
+            responsive: true, // Make it responsive
+            scales: {
+                y: {
+                    beginAtZero: true // Ensure Y-axis starts at 0
+                }
+            }
+        }
+    });
+
+    // function loaddata() {
+    //     var ajaxConfig = {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-type": 'application/json; charset=utf-8',
+    //         },
+    //     };
+    //     table.setData("/retailers_json");
+    // }
+</script>
+{% endblock %}
