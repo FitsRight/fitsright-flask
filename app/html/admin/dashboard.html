@@ -22,47 +22,31 @@
 
 <script>
 
+    let signupChart;
+
     $(document).ready(function () {
-        // loaddata();
+        loaddata();
     });
 
-    // Get the canvas element
-    const ctx = document.getElementById('myBarChart').getContext('2d');
+    // // Get the canvas element
+    // const ctx = document.getElementById('myBarChart').getContext('2d');
 
-    // Create a new bar chart
-    const myBarChart = new Chart(ctx, {
-        type: 'bar', // Specify the chart type
-        data: {
-            labels: ['January', 'February', 'March', 'April', 'May'], // X-axis labels
-            datasets: [{
-                label: 'User Signups',
-                data: [12, 19, 3, 5, 2], // Y-axis data points
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)', // Colors for each bar
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)', // Border colors
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)'
-                ],
-                borderWidth: 1 // Border width
-            }]
-        },
-        options: {
-            responsive: true, // Make it responsive
-            scales: {
-                y: {
-                    beginAtZero: true // Ensure Y-axis starts at 0
-                }
-            }
-        }
-    });
+    // // Create a new bar chart
+    // const myBarChart = new Chart(ctx, {
+    //     type: 'bar', // Specify the chart type
+    //     data: {
+    //         labels: [], // X-axis labels
+    //         datasets: []
+    //     },
+    //     options: {
+    //         responsive: true, // Make it responsive
+    //         scales: {
+    //             y: {
+    //                 beginAtZero: true // Ensure Y-axis starts at 0
+    //             }
+    //         }
+    //     }
+    // });
 
     // Get the canvas element
     const ctx2 = document.getElementById('myBarChart2').getContext('2d');
@@ -102,14 +86,117 @@
         }
     });
 
-    // function loaddata() {
-    //     var ajaxConfig = {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-type": 'application/json; charset=utf-8',
-    //         },
-    //     };
-    //     table.setData("/retailers_json");
-    // }
+    function loaddata() {
+        fetch('/signup_json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Process the data for Chart.js
+                const months = data.map(item => {
+                    // Convert YYYY-MM-DD format to month name
+                    const date = new Date(item.month);
+                    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                });
+
+                const counts = data.map(item => item.user_count);
+
+                // Create the chart once data is available
+                createChart(months, counts);
+            })
+            .catch(error => {
+                console.error('Error fetching signup data:', error);
+                // Create an empty chart or show an error message
+                document.getElementById('myBarChart').parentNode.innerHTML =
+                    '<p>Error loading signup data. Please try again later.</p>';
+            });
+    }
+
+    function createChart(labels, data) {
+        const ctx = document.getElementById('myBarChart').getContext('2d');
+
+        if (signupChart) {
+            signupChart.destroy();
+        }
+
+
+        // Generate colors based on the number of months
+        const colors = generateColors(labels.length);
+
+        signupChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'User Signups',
+                    data: data,
+                    backgroundColor: colors.map(color => `rgba(${color}, 0.2)`),
+                    borderColor: colors.map(color => `rgba(${color}, 1)`),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Users'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Monthly User Signups',
+                        font: {
+                            size: 16
+                        }
+                    },
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `Users: ${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Generate an array of color values
+    function generateColors(count) {
+        const baseColors = [
+            '255, 99, 132',   // red
+            '54, 162, 235',   // blue
+            '255, 206, 86',   // yellow
+            '75, 192, 192',   // green
+            '153, 102, 255',  // purple
+            '255, 159, 64'    // orange
+        ];
+
+        // If we have more months than base colors, repeat the colors
+        const colors = [];
+        for (let i = 0; i < count; i++) {
+            colors.push(baseColors[i % baseColors.length]);
+        }
+
+        return colors;
+    }
+
 </script>
 {% endblock %}

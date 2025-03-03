@@ -22,6 +22,7 @@ MarkupSafe==2.1.5
 msgspec==0.18.6
 packaging==24.1
 psycopg2-binary==2.9.9
+pydantic
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.2

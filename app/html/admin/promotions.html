@@ -1,0 +1,361 @@
+{% extends "/masterpage/admin.html" %}
+{% block content %}
+<div class="mt-5 container">
+    <div class="d-flex bd-highlight">
+        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Promotions</div>
+        <div class="p-2 bd-highlight">
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+        </div>
+    </div>
+    <div id="example-table"></div>
+</div>
+
+<div id="addretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Offer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="txtAddURL" class="form-label">URL</label>
+                    <input type="text" class="form-control" id="txtAddURL" placeholder="URL Name">
+                </div>
+                <div class="mb-3">
+                    <label for="txtAddwebsite" class="form-label">Image</label><br>
+                    <img id="imgAddImage" src="" alt="Image" class="img-fluid">
+                    <input type="file" id="fileInputAdd" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="add_offer();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Offer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hf_id">
+                <div class="mb-3">
+                    <label for="txtEditURL" class="form-label">URL</label>
+                    <input type="text" class="form-control" id="txtEditURL" placeholder="Retailer Name">
+                </div>
+                <div class="mb-3">
+                    <label for="txtEditwebsite" class="form-label">Image</label><br>
+                    <img id="imgEditImage" src="" alt="Image" class="img-fluid">
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                    <!-- <input type="text" class="form-control" id="txtEditwebsite" placeholder="website address"> -->
+                </div>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                    onclick="delete_offer();">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="edit_offer();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var editIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-edit'></i>";
+    };
+    var listIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-list'></i>";
+    };
+
+    var table = new Tabulator("#example-table", {
+        layout: "fitColumns", //fit columns to width of table (optional)
+        columns: [ //Define Table Columns
+            { title: "ID", field: "id", width: 1, visible: false },
+            { title: "base64", field: "base64", width: 1, visible: false },
+            {
+                title: "Edit", formatter: editIcon, width: 80, cellClick: function (e, cell) {
+                    // alert(cell.getRow().getData().id);
+                    document.getElementById("hf_id").value = cell.getRow().getData().id;
+                    document.getElementById("imgEditImage").src = "data:image/png;base64," + cell.getRow().getData().base64;
+                    document.getElementById("txtEditURL").value = cell.getRow().getData().url_redirect;
+                    $('#editretailer').modal('show');
+                }
+            },
+            { title: "URL", field: "url_redirect", headerFilter: "input" },
+        ],
+    });
+
+    table.on("dataFiltered", function (filters, rows) {
+        document.getElementById("lblRetCount").innerText = rows.length;
+    });
+    $(document).ready(function () {
+        loaddata();
+    });
+
+    function loaddata() {
+        var ajaxConfig = {
+            method: "POST",
+            headers: {
+                "Content-type": 'application/json; charset=utf-8',
+            },
+        };
+        table.setData("/promotions_json");
+    }
+
+    async function add_retailer() {
+        var allRows = table.getData(true);
+        var rowCount = allRows.length;
+
+        const apiUrl = "/add_retailer"; // Full Flask API URL
+
+        const payload = {
+            retailers_type: document.getElementById("selType").value,
+            name: document.getElementById("txtName").value,
+            website: document.getElementById("txtwebsite").value,
+            description: document.getElementById("txtdescription").value,
+            order: parseInt(rowCount) + 1,
+            status: 'Active',
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#addretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+
+    }
+    async function edit_offer() {
+        const apiUrl = "/edit_offer"; // Full Flask API URL
+
+        const payload = {
+            id: document.getElementById("hf_id").value,
+            base64: document.getElementById("imgEditImage").src.replace(/^data:image\/[a-zA-Z]+;base64,/, ""),
+            url_redirect: document.getElementById("txtEditURL").value,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#editretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+    async function delete_retailer() {
+        if (confirm('Are you sure you want to delete this retailer?') == true) {
+            const apiUrl = "/delete_retailer"; // Full Flask API URL
+
+            const payload = {
+                retailers_id: document.getElementById("hf_id").value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    $('#addretailer').modal('hide');
+                    loaddata();
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
+
+    const imgElement = document.getElementById('imgAddImage');
+    const fileInput = document.getElementById('fileInputAdd');
+
+    const imgEditElement = document.getElementById('imgEditImage');
+    const fileEditInput = document.getElementById('fileInput');
+
+    // Add click event to the image
+    imgElement.addEventListener('click', function () {
+        fileInput.click();
+    });
+
+    // Handle file selection
+    fileInput.addEventListener('change', function (event) {
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                // Set the image source to the loaded file
+                imgElement.src = e.target.result;
+            };
+
+            // Read the selected file as a data URL
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    });
+
+    // Add click event to the image
+    imgEditElement.addEventListener('click', function () {
+        fileAddInput.click();
+    });
+
+    // Handle file selection
+    fileEditInput.addEventListener('change', function (event) {
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                // Set the image source to the loaded file
+                imgAddElement.src = e.target.result;
+            };
+
+            // Read the selected file as a data URL
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    });
+
+    async function add_offer() {
+        var allRows = table.getData(true);
+        var rowCount = allRows.length;
+
+        const apiUrl = "/add_offer"; // Full Flask API URL
+
+        const payload = {
+            base64: document.getElementById('imgAddImage').src.replace(/^data:image\/[a-zA-Z]+;base64,/, ""),
+            url_redirect: document.getElementById("txtAddURL").value
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#addretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+
+    }
+    async function edit_retailer() {
+        const apiUrl = "/edit_retailer"; // Full Flask API URL
+
+        const payload = {
+            retailers_id: document.getElementById("hf_id").value,
+            retailers_type: document.getElementById("selEditType").value,
+            name: document.getElementById("txtEditName").value,
+            website: document.getElementById("txtEditwebsite").value,
+            description: document.getElementById("txteditdescription").value,
+            status: document.getElementById("selEditStatus").value,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#editretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+    async function delete_offer() {
+        if (confirm('Are you sure you want to delete this offer?') == true) {
+            const apiUrl = "/delete_offer"; // Full Flask API URL
+
+            const payload = {
+                offer_id: document.getElementById("hf_id").value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    $('#editretailer').modal('hide');
+                    loaddata();
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
+
+
+</script>
+{% endblock %}

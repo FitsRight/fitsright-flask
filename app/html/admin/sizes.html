@@ -2,10 +2,13 @@
 {% block content %}
 <div class="mt-5 container">
     <div class="d-flex bd-highlight">
-        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Retailers</div>
+        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Sizes</div>
         <div class="p-2 bd-highlight">
-            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
-                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+            <!-- <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button> -->
+            <button type="button" class="btn btn-outline-success me-2" onclick="saveOrder();"><i
+                    class="fas fa-save me-2"></i>Save
+                Order</button>
         </div>
     </div>
     <div id="example-table"></div>
@@ -15,7 +18,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Retailer</h5>
+                <h5 class="modal-title">Add Size</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -37,20 +40,6 @@
                 <div class="mb-3">
                     <label for="txtdescription" class="form-label">Description</label>
                     <input type="text" class="form-control" id="txtdescription" placeholder="Description">
-                </div>
-                <div class="row">
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPC" class="form-label">CPC</label>
-                            <input type="text" class="form-control" id="txtCPC" placeholder="CPC">
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPA" class="form-label">CPA</label>
-                            <input type="text" class="form-control" id="txtCPA" placeholder="CPA">
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -98,20 +87,6 @@
                     <label for="txteditdescription" class="form-label">Description</label>
                     <input type="text" class="form-control" id="txteditdescription" placeholder="Description">
                 </div>
-                <div class="row">
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPCE" class="form-label">CPC</label>
-                            <input type="text" class="form-control" id="txtCPCE" placeholder="CPC">
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPAE" class="form-label">CPA</label>
-                            <input type="text" class="form-control" id="txtCPAE" placeholder="CPA">
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
 
@@ -125,47 +100,32 @@
 </div>
 
 <script>
-    var editIcon = function (cell, formatterParams, onRendered) { //plain text value
-        return "<i class='fa fa-edit'></i>";
-    };
-    var listIcon = function (cell, formatterParams, onRendered) { //plain text value
-        return "<i class='fa fa-list'></i>";
-    };
-
     var table = new Tabulator("#example-table", {
         layout: "fitColumns", //fit columns to width of table (optional)
+        movableRows: true,
+        rowHeader: { headerSort: false, resizable: false, minWidth: 30, width: 30, rowHandle: true, formatter: "handle" },
         columns: [ //Define Table Columns
-            { title: "ID", field: "retailers_id", width: 150, visible: false },
-            { title: "description", field: "description", width: 150, visible: false },
-            { title: "status", field: "status", width: 150, visible: false },
-            {
-                title: "Edit", formatter: editIcon, width: 80, cellClick: function (e, cell) {
-                    document.getElementById("hf_id").value = cell.getRow().getData().retailers_id;
-                    document.getElementById("selEditType").value = cell.getRow().getData().retailers_type;
-                    document.getElementById("txtEditName").value = cell.getRow().getData().name;
-                    document.getElementById("txtEditwebsite").value = cell.getRow().getData().website;
-                    document.getElementById("txteditdescription").value = cell.getRow().getData().description;
-                    document.getElementById("selEditStatus").value = cell.getRow().getData().status;
-                    document.getElementById("txtCPCE").value = cell.getRow().getData().cpc;
-                    document.getElementById("txtCPAE").value = cell.getRow().getData().cpa;
-
-                    $('#editretailer').modal('show');
-                }
-            },
-            {
-                title: "Sizes", formatter: listIcon, width: 80, cellClick: function (e, cell) {
-                    window.location.href = "/admin/retailer_sizes/" + cell.getRow().getData().retailers_id;
-                }
-            },
-            { title: "Type", field: "retailers_type", width: 150, headerFilter: "input" },
+            { title: "ID", field: "sizes_uk_id", width: 150, visible: false },
+            { title: "system_genders_id", field: "system_genders_id", width: 150, visible: false },
+            { title: "sort", field: "sort", width: 150, visible: false },
+            { title: "gender_name", field: "gender_name", width: 150, headerFilter: "input" },
             { title: "Name", field: "name", headerFilter: "input" },
-            { title: "Sizes", field: "retailers__count", headerFilter: "input", width: 90 },
-            { title: "CPC", field: "cpc", headerFilter: "input", width: 90 },
-            { title: "CPA", field: "cpa", headerFilter: "input", width: 90 },
-            { title: "Website", field: "website", headerFilter: "input" },
+            { title: "status", field: "status", width: 150 },
+            { title: "grouping", field: "grouping_type", width: 150 },
         ],
     });
+    //trigger an alert message when the row is clicked
+    // table.on("rowClick", function (e, row) {
 
+    //     document.getElementById("hf_id").value = row.getData().retailers_id;
+    //     document.getElementById("selEditType").value = row.getData().retailers_type;
+    //     document.getElementById("txtEditName").value = row.getData().name;
+    //     document.getElementById("txtEditwebsite").value = row.getData().website;
+    //     document.getElementById("txteditdescription").value = row.getData().description;
+    //     document.getElementById("selEditStatus").value = row.getData().status;
+
+    //     $('#editretailer').modal('show');
+    // });
     table.on("dataFiltered", function (filters, rows) {
         document.getElementById("lblRetCount").innerText = rows.length;
     });
@@ -180,7 +140,7 @@
                 "Content-type": 'application/json; charset=utf-8',
             },
         };
-        table.setData("/retailers_json");
+        table.setData("/sizes_json");
     }
 
     async function add_retailer() {
@@ -196,8 +156,6 @@
             description: document.getElementById("txtdescription").value,
             order: parseInt(rowCount) + 1,
             status: 'Active',
-            CPC: document.getElementById("txtCPC").value,
-            CPA: document.getElementById("txtCPA").value,
         };
 
         try {
@@ -233,8 +191,6 @@
             website: document.getElementById("txtEditwebsite").value,
             description: document.getElementById("txteditdescription").value,
             status: document.getElementById("selEditStatus").value,
-            CPC: document.getElementById("txtCPCE").value,
-            CPA: document.getElementById("txtCPAE").value,
         };
 
         try {
@@ -288,6 +244,21 @@
                 console.error("Network Error:", error);
             }
         }
+    }
+    async function saveOrder() {
+        data = table.getData();
+        let sortedData = data.map((row, index) => ({
+            id: row.sizes_uk_id,
+            sort: index + 1 // Assigning a new sort order
+        }));
+        console.log('posting');
+        fetch("/sizes_update_sort", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(sortedData)
+        }).then(response => response.json())
+            .then(data => console.log("Sort order updated", data))
+            .catch(error => console.error("Error updating sort order:", error));
     }
 </script>
 {% endblock %}

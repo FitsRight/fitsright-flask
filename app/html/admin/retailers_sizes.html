@@ -2,7 +2,9 @@
 {% block content %}
 <div class="mt-5 container">
     <div class="d-flex bd-highlight">
-        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Retailers</div>
+        <div class="p-2 flex-grow-1 bd-highlight"><a class="btn btn-outline-success me-2" href="/admin/retailers"
+                title="Back"><i class="fas fa-arrow-left"></i></a><span id="lblRetCount" class="me-2"></span>Retailers
+            sizes <small class="text-info">(sizes in centimeters)</small></div>
         <div class="p-2 bd-highlight">
             <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
                 data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
@@ -20,42 +22,26 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="selType" class="form-label">Email address</label>
-                    <select class="form-select" id="selType">
-                        <option value="Single">Single</option>
-                        <option value="Multiple">Multiple</option>
+                    <label for="selGender" class="form-label">Gender</label>
+                    <select class="form-select" id="selGender" onchange="loadcats(this.value);">
+                        <option value="1" selected>Male</option>
+                        <option value="2">Female</option>
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="txtName" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="txtName" placeholder="Retailer Name">
+                    <label for="selCategorie" class="form-label">Categories</label>
+                    <select class="form-select" id="selCategorie">
+                    </select>
                 </div>
                 <div class="mb-3">
-                    <label for="txtwebsite" class="form-label">Website</label>
-                    <input type="text" class="form-control" id="txtwebsite" placeholder="website address">
-                </div>
-                <div class="mb-3">
-                    <label for="txtdescription" class="form-label">Description</label>
-                    <input type="text" class="form-control" id="txtdescription" placeholder="Description">
-                </div>
-                <div class="row">
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPC" class="form-label">CPC</label>
-                            <input type="text" class="form-control" id="txtCPC" placeholder="CPC">
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPA" class="form-label">CPA</label>
-                            <input type="text" class="form-control" id="txtCPA" placeholder="CPA">
-                        </div>
-                    </div>
+                    <label for="selSizes" class="form-label">Sizes</label>
+                    <select class="form-select" id="selSizes">
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="add_retailer();">Save changes</button>
+                <button type="button" class="btn btn-primary" onclick="add_retailer_size();">Add New</button>
             </div>
         </div>
     </div>
@@ -98,20 +84,6 @@
                     <label for="txteditdescription" class="form-label">Description</label>
                     <input type="text" class="form-control" id="txteditdescription" placeholder="Description">
                 </div>
-                <div class="row">
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPCE" class="form-label">CPC</label>
-                            <input type="text" class="form-control" id="txtCPCE" placeholder="CPC">
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <label for="txtCPAE" class="form-label">CPA</label>
-                            <input type="text" class="form-control" id="txtCPAE" placeholder="CPA">
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
 
@@ -125,52 +97,66 @@
 </div>
 
 <script>
-    var editIcon = function (cell, formatterParams, onRendered) { //plain text value
-        return "<i class='fa fa-edit'></i>";
-    };
-    var listIcon = function (cell, formatterParams, onRendered) { //plain text value
-        return "<i class='fa fa-list'></i>";
+    var deleteIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-trash'></i>";
     };
 
     var table = new Tabulator("#example-table", {
         layout: "fitColumns", //fit columns to width of table (optional)
         columns: [ //Define Table Columns
-            { title: "ID", field: "retailers_id", width: 150, visible: false },
-            { title: "description", field: "description", width: 150, visible: false },
-            { title: "status", field: "status", width: 150, visible: false },
+            { title: "ID", field: "retailers_sizes_id", width: 150, visible: false },
             {
-                title: "Edit", formatter: editIcon, width: 80, cellClick: function (e, cell) {
-                    document.getElementById("hf_id").value = cell.getRow().getData().retailers_id;
-                    document.getElementById("selEditType").value = cell.getRow().getData().retailers_type;
-                    document.getElementById("txtEditName").value = cell.getRow().getData().name;
-                    document.getElementById("txtEditwebsite").value = cell.getRow().getData().website;
-                    document.getElementById("txteditdescription").value = cell.getRow().getData().description;
-                    document.getElementById("selEditStatus").value = cell.getRow().getData().status;
-                    document.getElementById("txtCPCE").value = cell.getRow().getData().cpc;
-                    document.getElementById("txtCPAE").value = cell.getRow().getData().cpa;
+                title: "", formatter: deleteIcon, width: 50, cellClick: async function (e, cell) {
+                    if (confirm('Are you sure you want to delete ' + cell.getRow().getData().categorie_name + ' ' + cell.getRow().getData().size_name + ' ?') == true) {
+                        const payload = {
+                            retailers_sizes_id: cell.getRow().getData().retailers_sizes_id,
+                        };
+                        try {
+                            const response = await fetch("/delete_retailer_size", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(payload)
+                            });
 
-                    $('#editretailer').modal('show');
+                            if (response.ok) {
+                                const data = await response.json();
+                                loaddata();
+                            } else {
+                                const errorText = await response.text();
+                                console.error("Error:", errorText);
+                            }
+                        } catch (error) {
+                            console.error("Network Error:", error);
+                        }
+                    }
+                    // window.location.href = "/admin/retailer_sizes_delete/" + cell.getRow().getData().retailers_sizes_id;
                 }
             },
-            {
-                title: "Sizes", formatter: listIcon, width: 80, cellClick: function (e, cell) {
-                    window.location.href = "/admin/retailer_sizes/" + cell.getRow().getData().retailers_id;
-                }
-            },
-            { title: "Type", field: "retailers_type", width: 150, headerFilter: "input" },
-            { title: "Name", field: "name", headerFilter: "input" },
-            { title: "Sizes", field: "retailers__count", headerFilter: "input", width: 90 },
-            { title: "CPC", field: "cpc", headerFilter: "input", width: 90 },
-            { title: "CPA", field: "cpa", headerFilter: "input", width: 90 },
-            { title: "Website", field: "website", headerFilter: "input" },
+            { title: "gender", field: "gender_name", width: 150, headerFilter: "input", frozen: true },
+            { title: "categorie", field: "categorie_name", width: 150, headerFilter: "input", frozen: true },
+            { title: "size", field: "size_name", width: 150, headerFilter: "input", frozen: true },
+            { title: "neck", field: "neck", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "neck_to", field: "neck_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "chest", field: "chest", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "chest_to", field: "chest_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "under_bust", field: "under_bust", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "under_bust_to", field: "under_bust_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "waist", field: "waist", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "waist_to", field: "waist_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "hip", field: "hip", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "hip_to", field: "hip_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
         ],
     });
-
+    //trigger an alert message when the row is clicked
     table.on("dataFiltered", function (filters, rows) {
         document.getElementById("lblRetCount").innerText = rows.length;
     });
+
     $(document).ready(function () {
         loaddata();
+        loadcats(document.getElementById("selGender").value);
     });
 
     function loaddata() {
@@ -180,24 +166,20 @@
                 "Content-type": 'application/json; charset=utf-8',
             },
         };
-        table.setData("/retailers_json");
+        table.setData("/retailers_sizes_json/{{rref}}");
     }
 
-    async function add_retailer() {
+    async function add_retailer_size() {
         var allRows = table.getData(true);
         var rowCount = allRows.length;
 
-        const apiUrl = "/add_retailer"; // Full Flask API URL
+        const apiUrl = "/add_retailer_size"; // Full Flask API URL
 
         const payload = {
-            retailers_type: document.getElementById("selType").value,
-            name: document.getElementById("txtName").value,
-            website: document.getElementById("txtwebsite").value,
-            description: document.getElementById("txtdescription").value,
-            order: parseInt(rowCount) + 1,
-            status: 'Active',
-            CPC: document.getElementById("txtCPC").value,
-            CPA: document.getElementById("txtCPA").value,
+            sizes_categories_id: document.getElementById("selCategorie").value,
+            sizes_uk_id: document.getElementById("selSizes").value,
+            sizes_units_id: 2,
+            retailers_id: '{{rref}}',
         };
 
         try {
@@ -211,8 +193,7 @@
 
             if (response.ok) {
                 const data = await response.json();
-                // console.log("Successful:", data);
-                $('#addretailer').modal('hide');
+                // $('#addretailer').modal('hide');
                 loaddata();
             } else {
                 const errorText = await response.text();
@@ -233,8 +214,6 @@
             website: document.getElementById("txtEditwebsite").value,
             description: document.getElementById("txteditdescription").value,
             status: document.getElementById("selEditStatus").value,
-            CPC: document.getElementById("txtCPCE").value,
-            CPA: document.getElementById("txtCPAE").value,
         };
 
         try {
@@ -289,5 +268,49 @@
             }
         }
     }
+
+    async function loadcats(gref) {
+        const apiUrl = "/get_categories/" + gref; // Full Flask API URL
+        const selCategorie = document.getElementById("selCategorie");
+        const selSizes = document.getElementById("selSizes");
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json(); // Parse JSON response
+
+            if (response.ok) {
+                selCategorie.innerHTML = data.options; // Update dropdown options
+                selSizes.innerHTML = data.sizes;
+            } else {
+                console.error("Error:", data.message);
+                selCategorie.innerHTML = `<option value="">Error loading categories</option>`;
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            selCategorie.innerHTML = `<option value="">Failed to fetch categories</option>`;
+        }
+    }
+
+    async function editvalues(rowInfo) {
+        try {
+            const response = await fetch("/update_retailer_size", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(rowInfo)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Successful:", data);
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+
 </script>
 {% endblock %}

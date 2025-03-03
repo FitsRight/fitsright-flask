@@ -62,6 +62,31 @@ def admin_retailers():
    else:
       return redirect('/login')
 
+@home_url.route("/admin/retailer_sizes/<int:rref>", methods=['GET'])
+@login_required
+def admin_retailers_sizes(rref):
+   if current_user.is_authenticated:
+      return render_template('/admin/retailers_sizes.html', rref=rref)
+   else:
+      return redirect('/login')
+
+   
+@home_url.route("/admin/sizes", methods=['GET','POST'])
+@login_required
+def admin_sizes():
+   if current_user.is_authenticated:
+      return render_template('/admin/sizes.html')
+   else:
+      return redirect('/login')
+
+@home_url.route("/admin/promotions", methods=['GET','POST'])
+@login_required
+def admin_promotions():
+   if current_user.is_authenticated:
+      return render_template('/admin/promotions.html')
+   else:
+      return redirect('/login')
+
 @home_url.route("/admin/users", methods=['GET','POST'])
 @login_required
 def users_retailers():

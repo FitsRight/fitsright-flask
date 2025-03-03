@@ -6,8 +6,46 @@
         <!-- <div class="p-2 bd-highlight">
             <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
         </div> -->
-      </div>
+    </div>
     <div id="example-table"></div>
+</div>
+
+<input type="hidden" id="hf_id">
+
+<div id="useroption" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">User Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="txtPassword" class="form-label">Set Password</label>
+                    <input type="password" class="form-control" id="txtPassword" placeholder="Set Password">
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-auto">
+                        <label for="txtTokens" class="form-label">Tokens</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" class="form-control form-control-sm" id="txtTokens" placeholder="Tokens">
+                    </div>
+                    <div class="col-auto">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexAdmin">
+                            <label class="form-check-label" for="flexAdmin">Is Admin</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="update_user();">Save changes</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- <div id="addretailer" class="modal" tabindex="-1">
@@ -100,6 +138,7 @@
         layout: "fitColumns", //fit columns to width of table (optional)
         columns: [ //Define Table Columns
             { title: "ID", field: "users_customers_id", width: 150, visible: false },
+            { title: "is_admin", field: "is_admin", width: 150, visible: false },
             { title: "Email", field: "user_email", width: 150, headerFilter: "input" },
             { title: "Name", field: "full_name", headerFilter: "input" },
             { title: "Created", field: "created_at", headerFilter: "input" },
@@ -111,14 +150,12 @@
     //trigger an alert message when the row is clicked
     table.on("rowClick", function (e, row) {
 
-        document.getElementById("hf_id").value = row.getData().retailers_id;
-        document.getElementById("selEditType").value = row.getData().retailers_type;
-        document.getElementById("txtEditName").value = row.getData().name;
-        document.getElementById("txtEditwebsite").value = row.getData().website;
-        document.getElementById("txteditdescription").value = row.getData().description;
-        document.getElementById("selEditStatus").value = row.getData().status;
-        
-        $('#editretailer').modal('show');
+        document.getElementById("hf_id").value = row.getData().users_customers_id;
+
+        document.getElementById("txtTokens").value = row.getData().user_tokens;
+        document.getElementById("flexAdmin").checked = row.getData().is_admin;
+
+        $('#useroption').modal('show');
     });
     table.on("dataFiltered", function (filters, rows) {
         document.getElementById("lblRetCount").innerText = rows.length;
@@ -137,16 +174,14 @@
         table.setData("/users_json");
     }
 
-    async function edit_retailer() {
-        const apiUrl = "/edit_retailer"; // Full Flask API URL
+    async function update_user() {
+        const apiUrl = "/edit_user"; // Full Flask API URL
 
         const payload = {
-            retailers_id: document.getElementById("hf_id").value,
-            retailers_type: document.getElementById("selEditType").value,
-            name: document.getElementById("txtEditName").value,
-            website: document.getElementById("txtEditwebsite").value,
-            description: document.getElementById("txteditdescription").value,
-            status: document.getElementById("selEditStatus").value,
+            users_customers_id: document.getElementById("hf_id").value,
+            user_tokens: document.getElementById("txtTokens").value,
+            is_admin: document.getElementById("flexAdmin").checked,
+            user_password: document.getElementById("txtPassword").value
         };
 
         try {
@@ -161,7 +196,7 @@
             if (response.ok) {
                 const data = await response.json();
                 // console.log("Successful:", data);
-                $('#editretailer').modal('hide');
+                $('#useroption').modal('hide');
                 loaddata();
             } else {
                 const errorText = await response.text();
