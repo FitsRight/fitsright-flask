@@ -82,10 +82,10 @@ def edit_user():
             return jsonify({"error": "customer not found"}), 404     
 
         try:
-
-            bit_value = '1' if is_admin else '0'
+            
+            bit_value = 1 if is_admin else 0
             db.session.execute(
-                text("UPDATE public.users_customers SET is_admin = CAST(:bit_value AS BIT(1)) WHERE users_customers_id = :user_id"),
+                text("UPDATE public.users_customers SET is_admin = :bit_value WHERE users_customers_id = :user_id"),
                 {'bit_value': bit_value, 'user_id': users_customers_id}
             )
 

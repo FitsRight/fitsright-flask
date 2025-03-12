@@ -46,6 +46,15 @@
 
 </div>
 <script>
+  document.getElementById('txtPassword').addEventListener('keydown', function (event) {
+    // Check if the pressed key is Enter
+    if (event.key === 'Enter') {
+      // Prevent the default action (form submission)
+      event.preventDefault();
+      // Call your login function
+      login();
+    }
+  });
   function login() {
     loginUser("test@example.com", "password123");
   }

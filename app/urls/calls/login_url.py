@@ -25,14 +25,13 @@ def login():
         user = User.query.filter_by(user_email=user_email).first()
         if user:
             if user and user.user_password == hashed_password.strip():
-                print("username and password match")
                 login_user(user)
                 return jsonify({}),200
-        else:
-            print(f"{user.user_password} does not match {hashed_password}")
+        # else:
+        #     print(f"{user.user_password} does not match {hashed_password}")
         return jsonify({}),401
     except Exception as e:
-        print(e)
+        # print(e)
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
     
 
