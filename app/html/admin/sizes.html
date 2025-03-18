@@ -4,8 +4,8 @@
     <div class="d-flex bd-highlight">
         <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Sizes</div>
         <div class="p-2 bd-highlight">
-            <!-- <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
-                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button> -->
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
             <button type="button" class="btn btn-outline-success me-2" onclick="saveOrder();"><i
                     class="fas fa-save me-2"></i>Save
                 Order</button>
@@ -23,28 +23,20 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="selType" class="form-label">Email address</label>
+                    <label for="selType" class="form-label">Gender</label>
                     <select class="form-select" id="selType">
-                        <option value="Single">Single</option>
-                        <option value="Multiple">Multiple</option>
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label for="txtName" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="txtName" placeholder="Retailer Name">
-                </div>
-                <div class="mb-3">
-                    <label for="txtwebsite" class="form-label">Website</label>
-                    <input type="text" class="form-control" id="txtwebsite" placeholder="website address">
-                </div>
-                <div class="mb-3">
-                    <label for="txtdescription" class="form-label">Description</label>
-                    <input type="text" class="form-control" id="txtdescription" placeholder="Description">
+                    <input type="text" class="form-control" id="txtName" placeholder="Size Name">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="add_retailer();">Save changes</button>
+                <button type="button" class="btn btn-primary" onclick="add_size();">Save changes</button>
             </div>
         </div>
     </div>
@@ -143,18 +135,15 @@
         table.setData("/sizes_json");
     }
 
-    async function add_retailer() {
+    async function add_size() {
         var allRows = table.getData(true);
         var rowCount = allRows.length;
 
-        const apiUrl = "/add_retailer"; // Full Flask API URL
+        const apiUrl = "/add_size"; // Full Flask API URL
 
         const payload = {
-            retailers_type: document.getElementById("selType").value,
+            system_gender_id: document.getElementById("selType").value,
             name: document.getElementById("txtName").value,
-            website: document.getElementById("txtwebsite").value,
-            description: document.getElementById("txtdescription").value,
-            order: parseInt(rowCount) + 1,
             status: 'Active',
         };
 

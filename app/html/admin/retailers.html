@@ -125,12 +125,46 @@
 </div>
 
 <script>
-    var editIcon = function (cell, formatterParams, onRendered) { //plain text value
-        return "<i class='fa fa-edit'></i>";
-    };
-    var listIcon = function (cell, formatterParams, onRendered) { //plain text value
-        return "<i class='fa fa-list'></i>";
-    };
+    // var editIcon = function (cell, formatterParams, onRendered) { //plain text value
+    //     return "<i class='fa fa-edit'></i>";
+    // };
+    // var listIcon = function (cell, formatterParams, onRendered) { //plain text value
+    //     return "<i class='fa fa-list'></i>";
+    // };
+
+    var rowMenu = function (event, row) {
+        var menuItems = []
+        menuItems.push({
+            label: "<i class='fas fa-edit me-2'></i> Edit",
+            action: function (e, row) {
+                document.getElementById("hf_id").value = row.getData().retailers_id;
+                document.getElementById("selEditType").value = row.getData().retailers_type;
+                document.getElementById("txtEditName").value = row.getData().name;
+                document.getElementById("txtEditwebsite").value = row.getData().website;
+                document.getElementById("txteditdescription").value = row.getData().description;
+                document.getElementById("selEditStatus").value = row.getData().status;
+                document.getElementById("txtCPCE").value = row.getData().cpc;
+                document.getElementById("txtCPAE").value = row.getData().cpa;
+
+                $('#editretailer').modal('show');
+            }
+        });
+        menuItems.push({
+            label: "<i class='fas fa-list me-2'></i>Sizes",
+            action: function (e, row) {
+                window.location.href = "/admin/retailer_sizes/" + row.getData().retailers_id;
+            }
+        });
+        menuItems.push({
+            label: "<i class='fas fa-link me-2'></i>Links",
+            action: function (e, row) {
+                window.location.href = "/admin/retailer_links/" + row.getData().retailers_id;
+            }
+        });
+
+
+        return menuItems;
+    }
 
     var table = new Tabulator("#example-table", {
         layout: "fitColumns", //fit columns to width of table (optional)
@@ -138,32 +172,16 @@
             { title: "ID", field: "retailers_id", width: 150, visible: false },
             { title: "description", field: "description", width: 150, visible: false },
             { title: "status", field: "status", width: 150, visible: false },
-            {
-                title: "Edit", formatter: editIcon, width: 80, cellClick: function (e, cell) {
-                    document.getElementById("hf_id").value = cell.getRow().getData().retailers_id;
-                    document.getElementById("selEditType").value = cell.getRow().getData().retailers_type;
-                    document.getElementById("txtEditName").value = cell.getRow().getData().name;
-                    document.getElementById("txtEditwebsite").value = cell.getRow().getData().website;
-                    document.getElementById("txteditdescription").value = cell.getRow().getData().description;
-                    document.getElementById("selEditStatus").value = cell.getRow().getData().status;
-                    document.getElementById("txtCPCE").value = cell.getRow().getData().cpc;
-                    document.getElementById("txtCPAE").value = cell.getRow().getData().cpa;
-
-                    $('#editretailer').modal('show');
-                }
-            },
-            {
-                title: "Sizes", formatter: listIcon, width: 80, cellClick: function (e, cell) {
-                    window.location.href = "/admin/retailer_sizes/" + cell.getRow().getData().retailers_id;
-                }
-            },
-            { title: "Type", field: "retailers_type", width: 150, headerFilter: "input" },
+            { title: "Type", field: "retailers_type", width: 100, headerFilter: "input" },
             { title: "Name", field: "name", headerFilter: "input" },
-            { title: "Sizes", field: "retailers__count", headerFilter: "input", width: 90 },
-            { title: "CPC", field: "cpc", headerFilter: "input", width: 90 },
-            { title: "CPA", field: "cpa", headerFilter: "input", width: 90 },
+            { title: "Sizes", field: "retailers_count", headerFilter: "input", width: 70, headerSort: false, hozAlign: "center" },
+            { title: "CPC", field: "cpc", headerFilter: "input", width: 60, headerSort: false, hozAlign: "center" },
+            { title: "CPA", field: "cpa", headerFilter: "input", width: 60, headerSort: false, hozAlign: "center" },
+            { title: "Linked", field: "multiple_vendors", headerFilter: "input", width: 75, headerSort: false, hozAlign: "center" },
             { title: "Website", field: "website", headerFilter: "input" },
         ],
+        rowClickMenu: rowMenu,
+        rowContextMenu: rowMenu,
     });
 
     table.on("dataFiltered", function (filters, rows) {

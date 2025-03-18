@@ -1,0 +1,245 @@
+{% extends "/masterpage/admin.html" %}
+{% block content %}
+<div class="mt-5 container">
+    <div class="d-flex bd-highlight">
+        <div class="p-2 flex-grow-1 bd-highlight"><a class="btn btn-outline-success me-2" href="/admin/retailers"
+                title="Back"><i class="fas fa-arrow-left"></i></a><span id="lblRetCount" class="me-2"></span>Retailers
+            links</small></div>
+        <div class="p-2 bd-highlight">
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+        </div>
+    </div>
+    <div id="example-table"></div>
+</div>
+
+<div id="addretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Retailer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="selRetailer" class="form-label">Retailer</label>
+                    <select class="form-select" id="selRetailer" aria-label="Retailer">
+                        <option value="">Select Retailer</option>
+                        {% for retailer in retailers %}
+                        <option value="{{ retailer.retailers_id }}">{{ retailer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="add_retailer_link();">Add New</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var deleteIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-trash'></i>";
+    };
+
+    var table = new Tabulator("#example-table", {
+        layout: "fitColumns", //fit columns to width of table (optional)
+        columns: [ //Define Table Columns
+            { title: "ID", field: "retailers_multiple_id", width: 150, visible: false },
+            {
+                title: "", formatter: deleteIcon, width: 50, cellClick: async function (e, cell) {
+                    if (confirm('Are you sure you want to delete ' + cell.getRow().getData().name + ' ?') == true) {
+                        const payload = {
+                            retailers_multiple_id: cell.getRow().getData().retailers_multiple_id,
+                        };
+                        try {
+                            const response = await fetch("/delete_retailer_link", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                loaddata();
+                            } else {
+                                const errorText = await response.text();
+                                console.error("Error:", errorText);
+                            }
+                        } catch (error) {
+                            console.error("Network Error:", error);
+                        }
+                    }
+                }
+            },
+
+            { title: "Name", field: "name", widthgrow: 1, headerFilter: "input", frozen: true },
+        ],
+    });
+    //trigger an alert message when the row is clicked
+    table.on("dataFiltered", function (filters, rows) {
+        document.getElementById("lblRetCount").innerText = rows.length;
+    });
+
+    $(document).ready(function () {
+        loaddata();
+        loadcats(document.getElementById("selGender").value);
+    });
+
+    function loaddata() {
+        var ajaxConfig = {
+            method: "POST",
+            headers: {
+                "Content-type": 'application/json; charset=utf-8',
+            },
+        };
+        table.setData("/retailers_links_json/{{rref}}");
+    }
+
+    async function add_retailer_link() {
+        var allRows = table.getData(true);
+        var rowCount = allRows.length;
+
+        const apiUrl = "/add_retailer_link"; // Full Flask API URL
+
+        const payload = {
+            selRetailer: document.getElementById("selRetailer").value,
+            retailers_id: '{{rref}}',
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // $('#addretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+
+    }
+    async function edit_retailer() {
+        const apiUrl = "/edit_retailer"; // Full Flask API URL
+
+        const payload = {
+            retailers_id: document.getElementById("hf_id").value,
+            retailers_type: document.getElementById("selEditType").value,
+            name: document.getElementById("txtEditName").value,
+            website: document.getElementById("txtEditwebsite").value,
+            description: document.getElementById("txteditdescription").value,
+            status: document.getElementById("selEditStatus").value,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#editretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+    async function delete_retailer() {
+        if (confirm('Are you sure you want to delete this retailer?') == true) {
+            const apiUrl = "/delete_retailer"; // Full Flask API URL
+
+            const payload = {
+                retailers_id: document.getElementById("hf_id").value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    $('#addretailer').modal('hide');
+                    loaddata();
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
+
+    async function loadcats(gref) {
+        const apiUrl = "/get_categories/" + gref; // Full Flask API URL
+        const selCategorie = document.getElementById("selCategorie");
+        const selSizes = document.getElementById("selSizes");
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json(); // Parse JSON response
+
+            if (response.ok) {
+                selCategorie.innerHTML = data.options; // Update dropdown options
+                selSizes.innerHTML = data.sizes;
+            } else {
+                console.error("Error:", data.message);
+                selCategorie.innerHTML = `<option value="">Error loading categories</option>`;
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            selCategorie.innerHTML = `<option value="">Failed to fetch categories</option>`;
+        }
+    }
+
+    async function editvalues(rowInfo) {
+        try {
+            const response = await fetch("/update_retailer_size", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(rowInfo)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Successful:", data);
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+
+</script>
+{% endblock %}

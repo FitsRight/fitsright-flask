@@ -17,24 +17,25 @@ def retailers_json():
     try:
         # Improved query using JOIN instead of subquery
         query = text("""
-            SELECT 
-                r.retailers_id, 
-                r.retailers_type, 
-                r.name, 
-                r.website, 
-                r.description, 
-                r.status, 
-                COUNT(CASE WHEN rs.status = 'Active' THEN rs.retailers_sizes_id ELSE NULL END) as retailers_count,
-                r.cpc, 
-                r.cpa 
-            FROM 
-                public.retailers r
-            LEFT JOIN 
-                public.retailers_sizes rs ON r.retailers_id = rs.retailers_id
-            GROUP BY 
-                r.retailers_id, r.retailers_type, r.name, r.website, r.description, r.status, r.CPC, r.CPA
-            ORDER BY 
-                r.name ASC
+SELECT 
+    r.retailers_id, 
+    r.retailers_type, 
+    r.name, 
+    r.website, 
+    r.description, 
+    r.status, 
+    (SELECT COUNT(*) FROM public.retailers_sizes WHERE retailers_id = r.retailers_id) AS retailers_count,
+    r.cpc, 
+    r.cpa,
+    (SELECT COUNT(*) FROM public.retailers_multiple WHERE parent_retailers_id = r.retailers_id) AS multiple_vendors
+FROM 
+    public.retailers r
+LEFT JOIN 
+    public.retailers_sizes rs ON r.retailers_id = rs.retailers_id
+GROUP BY 
+    r.retailers_id, r.retailers_type, r.name, r.website, r.description, r.status, r.cpc, r.cpa
+ORDER BY 
+    r.name ASC;
         """)
         
         bookings = db.session.execute(query).fetchall()
@@ -54,7 +55,8 @@ def retailers_rows(row):
         status=row.status,
         retailers_count=row.retailers_count,
         cpc=row.cpc,
-        cpa=row.cpa
+        cpa=row.cpa,
+        multiple_vendors=row.multiple_vendors
     )
 
 
@@ -164,8 +166,8 @@ def edit_retailer():
                 "date_modified": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "status": status,
                 "retailers_id": retailers_id ,
-                "CPC": CPC,
-                "CPA": CPA
+                "CPC": float(CPC),
+                "CPA": float(CPA)
             }
         )
 
@@ -498,7 +500,12 @@ def promotions_json():
     try:
         bookings = db.session.execute(
             text(
-                "SELECT public.offers.id, public.offers.base64, public.offers.url_redirect FROM public.offers ORDER by url_redirect ASC"
+                """
+SELECT public.offers.id, public.offers.base64, public.offers.url_redirect, public.offers.retailers_id, public.retailers.name
+FROM public.offers 
+LEFT JOIN public.retailers ON public.retailers.retailers_id = public.offers.retailers_id
+ORDER by url_redirect ASC
+"""
             )
         ).fetchall()
         list_bookings = [promotions_rows(r) for r in bookings]
@@ -511,7 +518,9 @@ def promotions_rows(row):
     return dict(
         id=str(row.id),
         base64=row.base64,
-        url_redirect=row.url_redirect
+        url_redirect=row.url_redirect,
+        retailers_id=row.retailers_id,
+        retailers_name=row.name
     )
 
 @retailers_url.route('/edit_offer', methods=['POST'])
@@ -522,6 +531,7 @@ def edit_offer():
         id = data.get('id')
         base64 = data.get('base64')
         url_redirect = data.get('url_redirect')
+        retailers_id = data.get('retailers_id')
 
         # Check if the retailer exists
         retailer = db.session.execute(
@@ -538,13 +548,15 @@ def edit_offer():
                 UPDATE public.offers
                 SET 
                     base64 = :base64,
-                    url_redirect = :url_redirect
+                    url_redirect = :url_redirect,
+                    retailers_id = :retailers_id
                 WHERE id = :id
                 """
             ),
             {
                 "base64": base64,
                 "url_redirect": url_redirect,
+                "retailers_id": retailers_id,
                 "id": id 
             }
         )
@@ -557,7 +569,6 @@ def edit_offer():
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
 
-
 @retailers_url.route('/add_offer', methods=['POST'])
 def add_offer():
     try:
@@ -569,19 +580,21 @@ def add_offer():
             
         base64 = data.get('base64')
         url_redirect = data.get('url_redirect')
+        retailers_id = data.get('retailers_id')
 
         db.session.execute(
             text(
                 """
                     INSERT INTO public.offers(
-                    id, base64, url_redirect)
-                    VALUES (:id, :base64, :url_redirect);
+                    id, base64, url_redirect, retailers_id)
+                    VALUES (:id, :base64, :url_redirect, :retailers_id);
                 """
             ),
             {
                 "id": str(uuid.uuid4()),
                 "base64": base64,
-                "url_redirect": url_redirect
+                "url_redirect": url_redirect,
+                "retailers_id": retailers_id
             }
         )
 
@@ -592,7 +605,6 @@ def add_offer():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
-
 
 @retailers_url.route('/delete_offer', methods=['POST'])
 def delete_offer():
@@ -620,4 +632,252 @@ def delete_offer():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@retailers_url.route('/add_size', methods=['POST'])
+def add_size():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        system_gender_id = data.get('system_gender_id')
+        status = data.get('status')
+        db.session.execute(
+            text(
+                """
+                    INSERT INTO public.sizes_uk(
+                    name, system_genders_id, sort, status, grouping_type)
+                    VALUES (:name, :system_genders_id, :sort, :status, :grouping_type);
+                """
+            ),
+            {
+                "name": name,
+                "system_genders_id": int(system_gender_id),
+                "sort": int(0),
+                "status": status,
+                "grouping_type":2
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Offer added successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@retailers_url.route('/add_retailer_link', methods=['POST'])
+def add_retailer_link():
+    try:
+        data = request.get_json()
+            
+        selRetailer = data.get('selRetailer')
+        retailers_id = data.get('retailers_id')
+
+        db.session.execute(
+            text(
+                """
+                    INSERT INTO public.retailers_multiple(
+                    parent_retailers_id, child_retailers_id, status)
+                    VALUES (:parent_retailers_id, :child_retailers_id, :status);
+                """
+            ),
+            {
+                "parent_retailers_id": retailers_id,
+                "child_retailers_id": selRetailer,
+                "status": "Active"
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Link added successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+# Flask route to handle the user login
+@retailers_url.route('/retailers_links_json/<int:rref>', methods=['GET'])
+def retailers_links_json(rref):
+    try:
+        bookings = db.session.execute(
+            text(
+                f"""SELECT rm.retailers_multiple_id, r.name
+                    FROM public.retailers_multiple rm
+                    INNER JOIN public.retailers r ON rm.child_retailers_id = r.retailers_id
+                    WHERE rm.parent_retailers_id = :rref
+                    ORDER BY rm.retailers_multiple_id ASC;
+                    """
+            ),
+            {"rref": rref}
+        ).fetchall()
+        list_bookings = [retailers_links_rows(r) for r in bookings]
+        return jsonify(list_bookings)
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+def retailers_links_rows(row):
+    return dict(
+        retailers_multiple_id=row.retailers_multiple_id,
+        name=row.name,
+    )
+
+@retailers_url.route('/delete_retailer_link', methods=['POST'])
+def delete_retailer_link():
+    try:
+        data = request.get_json()
+        retailers_multiple_id = data.get('retailers_multiple_id')
+
+        db.session.execute(
+            text(
+                """
+                    DELETE FROM public.retailers_multiple WHERE retailers_multiple_id = :retailers_multiple_id;
+                """
+            ),
+            {
+                "retailers_multiple_id": str(retailers_multiple_id),
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Retrailer Link deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@retailers_url.route('/categories_json', methods=['GET'])
+def categories_json():
+    try:
+        bookings = db.session.execute(
+            text(
+                """
+                SELECT sizes_categories.*, system_genders.name as gendername
+                FROM public.sizes_categories
+                LEFT JOIN public.system_genders ON public.system_genders.system_genders_id = public.sizes_categories .system_genders_id
+                ORDER BY sizes_categories_id ASC 
+                """
+            )
+        ).fetchall()
+        list_bookings = [categories_rows(r) for r in bookings]
+        return jsonify(list_bookings)
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+def categories_rows(row):
+    return dict(
+        sizes_categories_id=str(row.sizes_categories_id),
+        system_genders_id=row.system_genders_id,
+        name=row.name,
+        description=row.description,
+        status=row.status,
+        grouping_type=row.grouping_type,
+        gender_name=row.gendername
+    )
+
+@retailers_url.route('/add_categorie', methods=['POST'])
+def add_categorie():
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        system_gender_id = data.get('selGenders')
+        description = data.get('description')
+
+        db.session.execute(
+            text(
+                """
+                    INSERT INTO public.sizes_categories(
+                    system_genders_id, name, description, status, grouping_type)
+                    VALUES (:system_genders_id, :name, :description, :status, :grouping_type);
+                """
+            ),
+            {
+                "name": name,
+                "system_genders_id": int(system_gender_id),
+                "description": description,
+                "status": "Active",
+                "grouping_type":int(0)
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Offer added successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@retailers_url.route('/edit_categorie', methods=['POST'])
+def edit_categorie():
+    try:
+        data = request.get_json()
+        # Validate required fields
+        id = data.get('sizes_categories_id')
+        selGenders = data.get('selGenders')
+        name = data.get('name')
+        description = data.get('description')
+        db.session.execute(
+        text(
+                """
+                UPDATE public.sizes_categories
+                SET 
+                    system_genders_id = :selGenders,
+                    name = :name,
+                    description = :description
+                WHERE sizes_categories_id = :id
+                """
+            ),
+            {
+                "selGenders": selGenders,
+                "name": name,
+                "description": description,
+                "id": id 
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Categorie updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@retailers_url.route('/delete_categorie', methods=['POST'])
+def delete_categorie():
+    try:
+        data = request.get_json()
+        sizes_categories_id = data.get('sizes_categories_id')
+
+        db.session.execute(
+            text(
+                """
+                    DELETE FROM public.sizes_categories WHERE sizes_categories_id = :sizes_categories_id;
+                """
+            ),
+            {
+                "sizes_categories_id": int(sizes_categories_id),
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Categorie deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+
+
+
+
+
+
+
+
 

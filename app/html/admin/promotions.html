@@ -24,6 +24,15 @@
                     <input type="text" class="form-control" id="txtAddURL" placeholder="URL Name">
                 </div>
                 <div class="mb-3">
+                    <label for="selRetailer" class="form-label">Retailer</label>
+                    <select class="form-select" id="selRetailer" aria-label="Retailer">
+                        <option value="">Select Retailer</option>
+                        {% for retailer in retailers %}
+                        <option value="{{ retailer.retailers_id }}">{{ retailer.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="txtAddwebsite" class="form-label">Image</label><br>
                     <img id="imgAddImage" src="" alt="Image" class="img-fluid">
                     <input type="file" id="fileInputAdd" accept="image/*" style="display: none;">
@@ -49,6 +58,15 @@
                 <div class="mb-3">
                     <label for="txtEditURL" class="form-label">URL</label>
                     <input type="text" class="form-control" id="txtEditURL" placeholder="Retailer Name">
+                </div>
+                <div class="mb-3">
+                    <label for="selEditRetailer" class="form-label">Retailer</label>
+                    <select class="form-select" id="selEditRetailer" aria-label="Retailer">
+                        <option value="">Select Retailer</option>
+                        {% for retailer in retailers %}
+                        <option value="{{ retailer.retailers_id }}">{{ retailer.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label for="txtEditwebsite" class="form-label">Image</label><br>
@@ -81,15 +99,18 @@
         columns: [ //Define Table Columns
             { title: "ID", field: "id", width: 1, visible: false },
             { title: "base64", field: "base64", width: 1, visible: false },
+            { title: "retailers_id", field: "retailers_id", width: 1, visible: false },
             {
                 title: "Edit", formatter: editIcon, width: 80, cellClick: function (e, cell) {
                     // alert(cell.getRow().getData().id);
                     document.getElementById("hf_id").value = cell.getRow().getData().id;
                     document.getElementById("imgEditImage").src = "data:image/png;base64," + cell.getRow().getData().base64;
+                    document.getElementById("selEditRetailer").value = cell.getRow().getData().retailers_id;
                     document.getElementById("txtEditURL").value = cell.getRow().getData().url_redirect;
                     $('#editretailer').modal('show');
                 }
             },
+            { title: "Retailer", field: "retailers_name", headerFilter: "input" },
             { title: "URL", field: "url_redirect", headerFilter: "input" },
         ],
     });
@@ -124,6 +145,7 @@
             description: document.getElementById("txtdescription").value,
             order: parseInt(rowCount) + 1,
             status: 'Active',
+            retailers_id: document.getElementById("selRetailer").value,
         };
 
         try {
@@ -156,6 +178,7 @@
             id: document.getElementById("hf_id").value,
             base64: document.getElementById("imgEditImage").src.replace(/^data:image\/[a-zA-Z]+;base64,/, ""),
             url_redirect: document.getElementById("txtEditURL").value,
+            retailers_id: document.getElementById("selEditRetailer").value,
         };
 
         try {

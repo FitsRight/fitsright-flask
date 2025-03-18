@@ -69,6 +69,24 @@ def admin_retailers_sizes(rref):
       return render_template('/admin/retailers_sizes.html', rref=rref)
    else:
       return redirect('/login')
+   
+@home_url.route("/admin/retailer_links/<int:rref>", methods=['GET'])
+@login_required
+def admin_retailers_links(rref):
+   if current_user.is_authenticated:
+      query = text("""
+      SELECT 
+         r.retailers_id, 
+         r.name
+      FROM 
+         public.retailers r
+      ORDER BY 
+         r.name ASC;
+            """)
+      retailers = db.session.execute(query).fetchall()        
+      return render_template('/admin/retailer_links.html', rref=rref, retailers=retailers)
+   else:
+      return redirect('/login')
 
    
 @home_url.route("/admin/sizes", methods=['GET','POST'])
@@ -83,7 +101,17 @@ def admin_sizes():
 @login_required
 def admin_promotions():
    if current_user.is_authenticated:
-      return render_template('/admin/promotions.html')
+      query = text("""
+      SELECT 
+         r.retailers_id, 
+         r.name
+      FROM 
+         public.retailers r
+      ORDER BY 
+         r.name ASC;
+            """)
+      retailers = db.session.execute(query).fetchall() 
+      return render_template('/admin/promotions.html', retailers=retailers)
    else:
       return redirect('/login')
 
@@ -95,6 +123,10 @@ def users_retailers():
    else:
       return redirect('/login')
 
+@home_url.route("/admin/categories", methods=['GET','POST'])
+@login_required
+def admin_categories():
+   return render_template('/admin/categories.html')
 
 @home_url.route("/admin/dashboard", methods=['GET','POST'])
 @login_required
@@ -105,3 +137,11 @@ def dashboard_retailers():
 def admin_logout():
    logout_user()
    return redirect('/login')
+
+@home_url.route("/admin/settings", methods=['GET','POST'])
+@login_required
+def users_settings():
+   if current_user.is_authenticated:
+      return render_template('/admin/settings.html')
+   else:
+      return redirect('/login')
