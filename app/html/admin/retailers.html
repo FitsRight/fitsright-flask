@@ -4,9 +4,10 @@
     <div class="d-flex bd-highlight">
         <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Retailers</div>
         <div class="p-2 bd-highlight">
-            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
         </div>
-      </div>
+    </div>
     <div id="example-table"></div>
 </div>
 
@@ -36,6 +37,20 @@
                 <div class="mb-3">
                     <label for="txtdescription" class="form-label">Description</label>
                     <input type="text" class="form-control" id="txtdescription" placeholder="Description">
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtCPC" class="form-label">CPC</label>
+                            <input type="text" class="form-control" id="txtCPC" placeholder="CPC">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtCPA" class="form-label">CPA</label>
+                            <input type="text" class="form-control" id="txtCPA" placeholder="CPA">
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -83,6 +98,20 @@
                     <label for="txteditdescription" class="form-label">Description</label>
                     <input type="text" class="form-control" id="txteditdescription" placeholder="Description">
                 </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtCPCE" class="form-label">CPC</label>
+                            <input type="text" class="form-control" id="txtCPCE" placeholder="CPC">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtCPAE" class="form-label">CPA</label>
+                            <input type="text" class="form-control" id="txtCPAE" placeholder="CPA">
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
 
@@ -96,29 +125,65 @@
 </div>
 
 <script>
+    // var editIcon = function (cell, formatterParams, onRendered) { //plain text value
+    //     return "<i class='fa fa-edit'></i>";
+    // };
+    // var listIcon = function (cell, formatterParams, onRendered) { //plain text value
+    //     return "<i class='fa fa-list'></i>";
+    // };
+
+    var rowMenu = function (event, row) {
+        var menuItems = []
+        menuItems.push({
+            label: "<i class='fas fa-edit me-2'></i> Edit",
+            action: function (e, row) {
+                document.getElementById("hf_id").value = row.getData().retailers_id;
+                document.getElementById("selEditType").value = row.getData().retailers_type;
+                document.getElementById("txtEditName").value = row.getData().name;
+                document.getElementById("txtEditwebsite").value = row.getData().website;
+                document.getElementById("txteditdescription").value = row.getData().description;
+                document.getElementById("selEditStatus").value = row.getData().status;
+                document.getElementById("txtCPCE").value = row.getData().cpc;
+                document.getElementById("txtCPAE").value = row.getData().cpa;
+
+                $('#editretailer').modal('show');
+            }
+        });
+        menuItems.push({
+            label: "<i class='fas fa-list me-2'></i>Sizes",
+            action: function (e, row) {
+                window.location.href = "/admin/retailer_sizes/" + row.getData().retailers_id;
+            }
+        });
+        menuItems.push({
+            label: "<i class='fas fa-link me-2'></i>Links",
+            action: function (e, row) {
+                window.location.href = "/admin/retailer_links/" + row.getData().retailers_id;
+            }
+        });
+
+
+        return menuItems;
+    }
+
     var table = new Tabulator("#example-table", {
         layout: "fitColumns", //fit columns to width of table (optional)
         columns: [ //Define Table Columns
             { title: "ID", field: "retailers_id", width: 150, visible: false },
             { title: "description", field: "description", width: 150, visible: false },
             { title: "status", field: "status", width: 150, visible: false },
-            { title: "Type", field: "retailers_type", width: 150, headerFilter: "input" },
+            { title: "Type", field: "retailers_type", width: 100, headerFilter: "input" },
             { title: "Name", field: "name", headerFilter: "input" },
+            { title: "Sizes", field: "retailers_count", headerFilter: "input", width: 70, headerSort: false, hozAlign: "center" },
+            { title: "CPC", field: "cpc", headerFilter: "input", width: 60, headerSort: false, hozAlign: "center" },
+            { title: "CPA", field: "cpa", headerFilter: "input", width: 60, headerSort: false, hozAlign: "center" },
+            { title: "Linked", field: "multiple_vendors", headerFilter: "input", width: 75, headerSort: false, hozAlign: "center" },
             { title: "Website", field: "website", headerFilter: "input" },
         ],
+        rowClickMenu: rowMenu,
+        rowContextMenu: rowMenu,
     });
-    //trigger an alert message when the row is clicked
-    table.on("rowClick", function (e, row) {
 
-        document.getElementById("hf_id").value = row.getData().retailers_id;
-        document.getElementById("selEditType").value = row.getData().retailers_type;
-        document.getElementById("txtEditName").value = row.getData().name;
-        document.getElementById("txtEditwebsite").value = row.getData().website;
-        document.getElementById("txteditdescription").value = row.getData().description;
-        document.getElementById("selEditStatus").value = row.getData().status;
-        
-        $('#editretailer').modal('show');
-    });
     table.on("dataFiltered", function (filters, rows) {
         document.getElementById("lblRetCount").innerText = rows.length;
     });
@@ -149,6 +214,8 @@
             description: document.getElementById("txtdescription").value,
             order: parseInt(rowCount) + 1,
             status: 'Active',
+            CPC: document.getElementById("txtCPC").value,
+            CPA: document.getElementById("txtCPA").value,
         };
 
         try {
@@ -184,6 +251,8 @@
             website: document.getElementById("txtEditwebsite").value,
             description: document.getElementById("txteditdescription").value,
             status: document.getElementById("selEditStatus").value,
+            CPC: document.getElementById("txtCPCE").value,
+            CPA: document.getElementById("txtCPAE").value,
         };
 
         try {

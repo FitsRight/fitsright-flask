@@ -23,15 +23,15 @@ def login():
         user_password = data.get('user_password').strip()
         hashed_password = hashlib.md5(user_password.encode()).hexdigest()
         user = User.query.filter_by(user_email=user_email).first()
-        if user and user.user_password == hashed_password.strip():
-            print("username and password match")
-            login_user(user)
-            return jsonify({}),200
-        else:
-            print(f"{user.user_password} does not match {hashed_password}")
+        if user:
+            if user and user.user_password == hashed_password.strip():
+                login_user(user)
+                return jsonify({}),200
+        # else:
+        #     print(f"{user.user_password} does not match {hashed_password}")
         return jsonify({}),401
     except Exception as e:
-        print(e)
+        # print(e)
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
     
 
@@ -39,7 +39,7 @@ def login():
 def load_user(user_id):
     """Check if user is logged-in upon page load."""
     if user_id is not None:
-        print(user_id)
+        # print(user_id)
         return User.query.filter_by(users_customers_id=user_id).first()
     return None
 

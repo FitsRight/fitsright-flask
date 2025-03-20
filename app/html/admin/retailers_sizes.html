@@ -1,0 +1,316 @@
+{% extends "/masterpage/admin.html" %}
+{% block content %}
+<div class="mt-5 container">
+    <div class="d-flex bd-highlight">
+        <div class="p-2 flex-grow-1 bd-highlight"><a class="btn btn-outline-success me-2" href="/admin/retailers"
+                title="Back"><i class="fas fa-arrow-left"></i></a><span id="lblRetCount" class="me-2"></span>Retailers
+            sizes <small class="text-info">(sizes in centimeters)</small></div>
+        <div class="p-2 bd-highlight">
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+        </div>
+    </div>
+    <div id="example-table"></div>
+</div>
+
+<div id="addretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Retailer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="selGender" class="form-label">Gender</label>
+                    <select class="form-select" id="selGender" onchange="loadcats(this.value);">
+                        <option value="1" selected>Male</option>
+                        <option value="2">Female</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="selCategorie" class="form-label">Categories</label>
+                    <select class="form-select" id="selCategorie">
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="selSizes" class="form-label">Sizes</label>
+                    <select class="form-select" id="selSizes">
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="add_retailer_size();">Add New</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Retailer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hf_id">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <label for="selEditType" class="form-label">Type</label>
+                        <select class="form-select" id="selEditType">
+                            <option value="Single">Single</option>
+                            <option value="Multiple">Multiple</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label for="selEditStatus" class="form-label">Status</label>
+                        <select class="form-select" id="selEditStatus">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="txtEditName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="txtEditName" placeholder="Retailer Name">
+                </div>
+                <div class="mb-3">
+                    <label for="txtEditwebsite" class="form-label">address</label>
+                    <input type="text" class="form-control" id="txtEditwebsite" placeholder="website address">
+                </div>
+                <div class="mb-3">
+                    <label for="txteditdescription" class="form-label">Description</label>
+                    <input type="text" class="form-control" id="txteditdescription" placeholder="Description">
+                </div>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                    onclick="delete_retailer();">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="edit_retailer();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var deleteIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-trash'></i>";
+    };
+
+    var table = new Tabulator("#example-table", {
+        layout: "fitColumns", //fit columns to width of table (optional)
+        columns: [ //Define Table Columns
+            { title: "ID", field: "retailers_sizes_id", width: 150, visible: false },
+            {
+                title: "", formatter: deleteIcon, width: 50, cellClick: async function (e, cell) {
+                    if (confirm('Are you sure you want to delete ' + cell.getRow().getData().categorie_name + ' ' + cell.getRow().getData().size_name + ' ?') == true) {
+                        const payload = {
+                            retailers_sizes_id: cell.getRow().getData().retailers_sizes_id,
+                        };
+                        try {
+                            const response = await fetch("/delete_retailer_size", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                loaddata();
+                            } else {
+                                const errorText = await response.text();
+                                console.error("Error:", errorText);
+                            }
+                        } catch (error) {
+                            console.error("Network Error:", error);
+                        }
+                    }
+                    // window.location.href = "/admin/retailer_sizes_delete/" + cell.getRow().getData().retailers_sizes_id;
+                }
+            },
+            { title: "gender", field: "gender_name", width: 150, headerFilter: "input", frozen: true },
+            { title: "categorie", field: "categorie_name", width: 150, headerFilter: "input", frozen: true },
+            { title: "size", field: "size_name", width: 150, headerFilter: "input", frozen: true },
+            { title: "neck", field: "neck", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "neck_to", field: "neck_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "chest", field: "chest", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "chest_to", field: "chest_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "under_bust", field: "under_bust", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "under_bust_to", field: "under_bust_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "waist", field: "waist", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "waist_to", field: "waist_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "hip", field: "hip", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "hip_to", field: "hip_to", width: 150, headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+        ],
+    });
+    //trigger an alert message when the row is clicked
+    table.on("dataFiltered", function (filters, rows) {
+        document.getElementById("lblRetCount").innerText = rows.length;
+    });
+
+    $(document).ready(function () {
+        loaddata();
+        loadcats(document.getElementById("selGender").value);
+    });
+
+    function loaddata() {
+        var ajaxConfig = {
+            method: "POST",
+            headers: {
+                "Content-type": 'application/json; charset=utf-8',
+            },
+        };
+        table.setData("/retailers_sizes_json/{{rref}}");
+    }
+
+    async function add_retailer_size() {
+        var allRows = table.getData(true);
+        var rowCount = allRows.length;
+
+        const apiUrl = "/add_retailer_size"; // Full Flask API URL
+
+        const payload = {
+            sizes_categories_id: document.getElementById("selCategorie").value,
+            sizes_uk_id: document.getElementById("selSizes").value,
+            sizes_units_id: 2,
+            retailers_id: '{{rref}}',
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // $('#addretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+
+    }
+    async function edit_retailer() {
+        const apiUrl = "/edit_retailer"; // Full Flask API URL
+
+        const payload = {
+            retailers_id: document.getElementById("hf_id").value,
+            retailers_type: document.getElementById("selEditType").value,
+            name: document.getElementById("txtEditName").value,
+            website: document.getElementById("txtEditwebsite").value,
+            description: document.getElementById("txteditdescription").value,
+            status: document.getElementById("selEditStatus").value,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#editretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+    async function delete_retailer() {
+        if (confirm('Are you sure you want to delete this retailer?') == true) {
+            const apiUrl = "/delete_retailer"; // Full Flask API URL
+
+            const payload = {
+                retailers_id: document.getElementById("hf_id").value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    $('#addretailer').modal('hide');
+                    loaddata();
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
+
+    async function loadcats(gref) {
+        const apiUrl = "/get_categories/" + gref; // Full Flask API URL
+        const selCategorie = document.getElementById("selCategorie");
+        const selSizes = document.getElementById("selSizes");
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json(); // Parse JSON response
+
+            if (response.ok) {
+                selCategorie.innerHTML = data.options; // Update dropdown options
+                selSizes.innerHTML = data.sizes;
+            } else {
+                console.error("Error:", data.message);
+                selCategorie.innerHTML = `<option value="">Error loading categories</option>`;
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            selCategorie.innerHTML = `<option value="">Failed to fetch categories</option>`;
+        }
+    }
+
+    async function editvalues(rowInfo) {
+        try {
+            const response = await fetch("/update_retailer_size", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(rowInfo)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Successful:", data);
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+
+</script>
+{% endblock %}

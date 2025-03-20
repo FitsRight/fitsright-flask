@@ -1,182 +1,226 @@
 {% extends "/masterpage/external.html" %}
 {% block content %}
-    <!-- Hero Section -->
-    <section class="py-5 text-center Hero mt-4">
-        <div class="container">
-            <div class="row mt-5 mb-5">
-                <div class="col-12 col-md-8 text-start">
-                    <h1 class="mb-5">Transforming Your Online Shopping Experience</h1>
-                    <p class="mb-5">Welcome to Fits Right, where we’re revolutionizing the online shopping experience and enhancing the fitness journey, all in one app!</p>
-                    <div class="d-flex justify-content-center gap-3 mt-3">
-                        <a href="https://apps.apple.com/app/fitsright/id1665169197">
-                            <img src="/static/images/appstore-logo.png" alt="App Store" width="150">
-                        </a>
-                        <a href="https://play.google.com/store/apps/details?id=com.fitsright.app">
-                            <img src="/static/images/googleplay-logo.png" alt="Google Play" width="150">
-                        </a>
-                    </div>
-                </div>
-                <div class="col-12 col-md-4">
-                    <img src="/static/images/hero_section.png" alt="Fits Right Logo" class="img-fluid">
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Features Section -->
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center fitrightcolor">Online Shopping Without the Guess work</h2>
-            <h5 class="text-center fitrightcolor">All in one app to make sure your next clothes shopping online is on point.</h5>
-            <div class="row mt-5">
-                <div class="col-md-2"></div>
-                <div class="col-md-8">
-                    <video autoplay muted loop class="img-fluid">
-                        <source src="/static/videos/Fits-Right_v3.mp4" type="video/mp4">
-                    </video>
-                </div>
-                <div class="col-md-2"></div>
-            </div>
+<style>
+    .overlay-section {
+        position: relative;
+    }
 
-            <div class="row text-center mt-5">
-                <div class="col-md-6 mt-4">
-                    <i class="fas fa-users-cog fa-2x mb-2 fitrightcolor"></i>
-                    <h5 class="fitrightcolor">Personalized Recommendations</h5>
-                    <p>Our app uses your unique measurements and preferences to recommend clothes that fit you.</p>
+    .overlay-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/static/images/dots.png');
+        background-repeat: round;
+        opacity: 0.2;
+        pointer-events: none;
+        z-index: 0;
+    }
+</style>
+<!-- Hero Section -->
+<section class="py-5 text-center Hero mt-4 overlay-section">
+    <div class="container" style="display: flow-root; position: relative; z-index: 1;">
+        <div class="row mt-5 mb-5">
+            <div class="col-12 col-md-8 text-start">
+                <h1 class="mb-5">Transforming Your Online Shopping Experience</h1>
+                <p class="mb-5">Welcome to Fits Right, where we’re revolutionizing the online shopping experience and
+                    enhancing the fitness journey, all in one app!</p>
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <a href="https://apps.apple.com/app/fitsright/id1665169197">
+                        <img src="/static/images/appstore-logo.png" alt="App Store" width="150">
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=com.fitsright.app">
+                        <img src="/static/images/googleplay-logo.png" alt="Google Play" width="150">
+                    </a>
                 </div>
-                <div class="col-md-6 mt-4">
-                    <i class="fas fa-smile-beam fa-2x mb-2 fitrightcolor"></i>
-                    <h5 class="fitrightcolor">User-Friendly Interface</h5>
-                    <p>With an intuitive design, find your desired clothes quickly and effortlessly.</p>
+            </div>
+            <div class="col-12 col-md-4">
+                <img src="/static/images/hero_section.png" alt="Fits Right Logo" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center fitrightcolor">Online Shopping Without the Guess work</h2>
+        <h5 class="text-center fitrightcolor">All in one app to make sure your next clothes shopping online is on point.
+        </h5>
+        <div class="row mt-5">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <video autoplay muted loop class="img-fluid">
+                    <source src="/static/videos/Fits-Right_v3.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+        <div class="row text-center mt-5">
+            <div class="col-md-6 mt-4">
+                <i class="fas fa-users-cog fa-2x mb-2 fitrightcolor"></i>
+                <h5 class="fitrightcolor">Personalized Recommendations</h5>
+                <p>Our app uses your unique measurements and preferences to recommend clothes that fit you.</p>
+            </div>
+            <div class="col-md-6 mt-4">
+                <i class="fas fa-smile-beam fa-2x mb-2 fitrightcolor"></i>
+                <h5 class="fitrightcolor">User-Friendly Interface</h5>
+                <p>With an intuitive design, find your desired clothes quickly and effortlessly.</p>
+            </div>
+            <div class="col-md-6 mt-4">
+                <i class="fas fa-network-wired fa-2x mb-2 fitrightcolor"></i>
+                <h5 class="fitrightcolor">Comprehensive Database</h5>
+                <p>We provide a database of clothing brands and sizes to match your unique measurements.</p>
+            </div>
+            <div class="col-md-6 mt-4">
+                <i class="fas fa-user-clock fa-2x mb-2 fitrightcolor"></i>
+                <h5 class="fitrightcolor">Time-Saving Convenience</h5>
+                <p>Shop for clothes without the hassle of returns or misfits.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Call to Action Section -->
+<section class="bg-dark text-white py-5 overlay-section" style="background-color: #3541A5!important;">
+    <div class="container text-center" style="display: flow-root; position: relative; z-index: 1;">
+        <h2 class="mb-5">Shopping for Clothes Online Made Easy</h2>
+        <img src="/static/images/fits_right_scanner.png" alt="Fits Right Logo" class="col-md-4 float-start">
+        <p>Are you tired of the frustration that comes with ordering clothes online, only to find they don’t quite hit
+            the mark? Say goodbye to those woes with Fits Right’s mobile application, boasting a market-leading size
+            recommendation service.</p>
+        <p>Harnessing cutting-edge 3D body scanning technology, our app offers a guided solution to match you with your
+            recommended sizes, ensuring an optimal fit every time. With millions of data points captured on the body
+            surface in just seconds, our infrared technology prioritizes customer privacy and safety without
+            compromising accuracy.</p>
+    </div>
+</section>
+<!-- Call to Action Section -->
+<section class="py-5">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-md-7 text-start">
+                <h2 class="fitrightcolor mb-5">Shop for your friends and family easily</h2>
+                <p>Fits Right goes beyond individual needs by offering a unique feature: the ability to add family and
+                    friends who are also Fits Right users to your account. This collaborative approach allows you to
+                    shop with confidence for your loved ones, with their size recommendations readily available when
+                    browsing different retailers.</p>
+            </div>
+            <div class="col-md-5">
+                <img src="/static/images/customise.png" alt="Fits Right Logo" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Call to Action Section -->
+<section class="py-5">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-md-5">
+                <img src="/static/images/fits_right_measurements.png" alt="Fits Right Logo" class="img-fluid">
+            </div>
+            <div class="col-md-7 text-start">
+                <h2 class="fitrightcolor mb-5">Input your measurements</h2>
+                <p>We offer two convenient methods for inputting your measurements:</p>
+                <ol>
+                    <li><b class="fitrightcolor">Manual: </b>If you don’t have access to one of our 3D scanners, you can
+                        manually measure yourself. Despite this, you still gain access to all of our size recommendation
+                        services.</li>
+                    <li><b class="fitrightcolor">3D Body Scan: </b>Upon receiving your 3D Body Scan, you’ll find it
+                        accessible in both your avatar and profile sections within the app. This method stands as the
+                        most precise way to generate your size recommendations.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Call to Action Section -->
+<section class="py-5">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-md-7 text-start">
+                <h2 class="fitrightcolor mb-5">Our algorithm will guide you</h2>
+                <p>Fits Right’s mobile application revolutionizes the way you shop by providing a market-leading size
+                    recommendation service.</p>
+                <p>Once you’ve completed either process, simply utilize our ‘Fits Right’ phone app to shop across all
+                    your favorite retailers. Our advanced algorithm seamlessly guides you to your perfect sizes,
+                    ensuring a hassle-free shopping experience</p>
+            </div>
+            <div class="col-md-5">
+                <img src="/static/images/fits_right_algorithm.png" alt="Fits Right Logo" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Call to Action Section -->
+<section class="py-5">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-md-5">
+                <img src="/static/images/sustainable-recycle.png" alt="Fits Right Logo" class="img-fluid">
+            </div>
+            <div class="col-md-7 text-start">
+                <h2 class="fitrightcolor mb-5">Sustainability</h2>
+                <p>At Fits Right, we’re not just about convenience and style – we’re also committed to sustainability.
+                    Did you know that a staggering 66% of all clothing returns are size-related? Not to mention, 20% of
+                    shoppers often buy multiple sizes, only to return the ones that don’t fit. Each returned item
+                    contributes to approximately 181g of CO2 emissions, exacerbating the environmental impact of fast
+                    fashion</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="py-5 overlay-section">
+    <div class="container text-center" style="display: flow-root; position: relative; z-index: 1;">
+        <div class="row">
+            <div class="col-12 mb-5">
+                <!-- <h5 class="text-center">Reviews</h5> -->
+                <h2 class="text-center fitrightcolor">What users have to say</h2>
+            </div>
+            <div class="col-md-6 text-start">
+                <div class="shadow p-3 mb-5 bg-body rounded">
+                    <p>"I love this app! It's so easy to use and gave me accurate measurements for my clothes. Now I can
+                        confidently order clothes online without worrying about the fit. Highly recommend!"</p>
+                    <h6 class="fitrightcolor">Sarah</h6>
                 </div>
-                <div class="col-md-6 mt-4">
-                    <i class="fas fa-network-wired fa-2x mb-2 fitrightcolor"></i>
-                    <h5 class="fitrightcolor">Comprehensive Database</h5>
-                    <p>We provide a database of clothing brands and sizes to match your unique measurements.</p>
+            </div>
+            <div class="col-md-6 text-start">
+                <div class="shadow p-3 mb-5 bg-body rounded">
+                    <p>"I was sceptical at first, but this app proved me wrong. It's super convenient and saved me a
+                        trip to the tailor. The measurements were spot on and I'm really happy with the results."</p>
+                    <h6 class="fitrightcolor">John</h6>
                 </div>
-                <div class="col-md-6 mt-4">
-                    <i class="fas fa-user-clock fa-2x mb-2 fitrightcolor"></i>
-                    <h5 class="fitrightcolor">Time-Saving Convenience</h5>
-                    <p>Shop for clothes without the hassle of returns or misfits.</p>
+            </div>
+            <div class="col-md-12 text-start">
+                <div class="shadow p-3 mb-5 bg-body rounded">
+                    <p>"As someone who hates shopping for clothes, this app is a lifesaver. It's fast and efficient, and
+                        the results are reliable. I can finally order clothes online without fearing getting the wrong
+                        size. Thank you!"</p>
+                    <h6 class="fitrightcolor">Emily</h6>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- Call to Action Section -->
-    <section class="bg-dark text-white py-5" style="background-color: #3541A5!important;">
-        <div class="container text-center" style="display: flow-root;">
-            <h2 class="mb-5">Shopping for Clothes Online Made Easy</h2>
-            <img src="/static/images/fits_right_scanner.png" alt="Fits Right Logo" class="col-md-4 float-start">
-            <p>Are you tired of the frustration that comes with ordering clothes online, only to find they don’t quite hit the mark? Say goodbye to those woes with Fits Right’s mobile application, boasting a market-leading size recommendation service.</p>
-            <p>Harnessing cutting-edge 3D body scanning technology, our app offers a guided solution to match you with your recommended sizes, ensuring an optimal fit every time. With millions of data points captured on the body surface in just seconds, our infrared technology prioritizes customer privacy and safety without compromising accuracy.</p>
-        </div>
-    </section>
-    <!-- Call to Action Section -->
-    <section class="py-5">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col-md-7 text-start">
-                    <h2 class="fitrightcolor mb-5">Shop for your friends and family easily</h2>
-                    <p>Fits Right goes beyond individual needs by offering a unique feature: the ability to add family and friends who are also Fits Right users to your account. This collaborative approach allows you to shop with confidence for your loved ones, with their size recommendations readily available when browsing different retailers.</p>
-                </div>
-                <div class="col-md-5">
-                    <img src="/static/images/customise.png" alt="Fits Right Logo" class="img-fluid">
-                </div>                
-            </div>
-        </div>
-    </section>
-    <!-- Call to Action Section -->
-    <section class="py-5">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/static/images/fits_right_measurements.png" alt="Fits Right Logo" class="img-fluid">
-                </div>  
-                <div class="col-md-7 text-start">
-                    <h2 class="fitrightcolor mb-5">Input your measurements</h2>
-                    <p>We offer two convenient methods for inputting your measurements:</p>
-                    <ol>
-                        <li><b class="fitrightcolor">Manual: </b>If you don’t have access to one of our 3D scanners, you can manually measure yourself. Despite this, you still gain access to all of our size recommendation services.</li>
-                        <li><b class="fitrightcolor">3D Body Scan: </b>Upon receiving your 3D Body Scan, you’ll find it accessible in both your avatar and profile sections within the app. This method stands as the most precise way to generate your size recommendations.</li>
-                    </ol>
-                </div>              
-            </div>
-        </div>
-    </section>
-    <!-- Call to Action Section -->
-    <section class="py-5">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col-md-7 text-start">
-                    <h2 class="fitrightcolor mb-5">Our algorithm will guide you</h2>
-                    <p>Fits Right’s mobile application revolutionizes the way you shop by providing a market-leading size recommendation service.</p>
-                    <p>Once you’ve completed either process, simply utilize our ‘Fits Right’ phone app to shop across all your favorite retailers. Our advanced algorithm seamlessly guides you to your perfect sizes, ensuring a hassle-free shopping experience</p>
-                </div>
-                <div class="col-md-5">
-                    <img src="/static/images/fits_right_algorithm.png" alt="Fits Right Logo" class="img-fluid">
-                </div>                
-            </div>
-        </div>
-    </section>
-    <!-- Call to Action Section -->
-    <section class="py-5">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/static/images/sustainable-recycle.png" alt="Fits Right Logo" class="img-fluid">
-                </div>  
-                <div class="col-md-7 text-start">
-                    <h2 class="fitrightcolor mb-5">Sustainability</h2>
-                    <p>At Fits Right, we’re not just about convenience and style – we’re also committed to sustainability. Did you know that a staggering 66% of all clothing returns are size-related? Not to mention, 20% of shoppers often buy multiple sizes, only to return the ones that don’t fit. Each returned item contributes to approximately 181g of CO2 emissions, exacerbating the environmental impact of fast fashion</p>
-                </div>              
-            </div>
-        </div>
-    </section>
-    <hr>
-    <section class="py-5">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col-12 mb-5">
-                    <h5 class="text-center">Reviews</h5>
-                    <h2 class="text-center fitrightcolor">What users have to say</h2>
-                </div>
-                <div class="col-md-6 text-start">
-                    <div class="shadow p-3 mb-5 bg-body rounded">
-                        <p>"I love this app! It's so easy to use and gave me accurate measurements for my clothes. Now I can confidently order clothes online without worrying about the fit. Highly recommend!"</p>
-                        <h6 class="fitrightcolor">Sarah</h6>
-                    </div>
-                </div>  
-                <div class="col-md-6 text-start">
-                    <div class="shadow p-3 mb-5 bg-body rounded">
-                        <p>"I was sceptical at first, but this app proved me wrong. It's super convenient and saved me a trip to the tailor. The measurements were spot on and I'm really happy with the results."</p>
-                        <h6 class="fitrightcolor">John</h6>
-                    </div>
-                </div>  
-                <div class="col-md-12 text-start">
-                    <div class="shadow p-3 mb-5 bg-body rounded">
-                        <p>"As someone who hates shopping for clothes, this app is a lifesaver. It's fast and efficient, and the results are reliable. I can finally order clothes online without fearing getting the wrong size. Thank you!"</p>
-                        <h6 class="fitrightcolor">Emily</h6>
-                    </div>
-                </div>              
-            </div>
-        </div>
-    </section>
-    <!-- Hero Section -->
-    <section class="py-5 text-center footer mt-4">
-        <div class="container">
-            <div class="row mt-5 mb-5">
-                <div class="col-12 text-center">
-                    <h1 class="mb-5">Shop online with confidence</h1>
-                    <p class="mb-5">Say Hello to Hassle-Free Online Shopping, Shop with Confidence and without the frustration of online returns.</p>
-                    <div class="d-flex justify-content-center gap-3 mt-3">
-                        <a href="https://apps.apple.com/app/fitsright/id1665169197">
-                            <img src="/static/images/appstore-logo.png" alt="App Store" width="150">
-                        </a>
-                        <a href="https://play.google.com/store/apps/details?id=com.fitsright.app">
-                            <img src="/static/images/googleplay-logo.png" alt="Google Play" width="150">
-                        </a>
-                    </div>
+    </div>
+</section>
+<!-- Hero Section -->
+<section class="py-5 text-center footer mt-4">
+    <div class="container">
+        <div class="row mt-5 mb-5">
+            <div class="col-12 text-center">
+                <h1 class="mb-5">Shop online with confidence</h1>
+                <p class="mb-5">Say Hello to Hassle-Free Online Shopping, Shop with Confidence and without the
+                    frustration of online returns.</p>
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <a href="https://apps.apple.com/app/fitsright/id1665169197">
+                        <img src="/static/images/appstore-logo.png" alt="App Store" width="150">
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=com.fitsright.app">
+                        <img src="/static/images/googleplay-logo.png" alt="Google Play" width="150">
+                    </a>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 {% endblock %}

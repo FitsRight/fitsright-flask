@@ -2,83 +2,41 @@
 {% block content %}
 <div class="mt-5 container">
     <div class="d-flex bd-highlight">
-        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Users</div>
-        <!-- <div class="p-2 bd-highlight">
-            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
-        </div> -->
+        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Sizes</div>
+        <div class="p-2 bd-highlight">
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+            <button type="button" class="btn btn-outline-success me-2" onclick="saveOrder();"><i
+                    class="fas fa-save me-2"></i>Save
+                Order</button>
+        </div>
     </div>
     <div id="example-table"></div>
 </div>
 
-<input type="hidden" id="hf_id">
-
-<div id="useroption" class="modal" tabindex="-1">
+<div id="addretailer" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">User Options</h5>
+                <h5 class="modal-title">Add Size</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="txtPassword" class="form-label">Set Password</label>
-                    <input type="password" class="form-control" id="txtPassword" placeholder="Set Password">
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-auto">
-                        <label for="txtTokens" class="form-label">Tokens</label>
-                    </div>
-                    <div class="col-auto">
-                        <input type="number" class="form-control form-control-sm" id="txtTokens" placeholder="Tokens">
-                    </div>
-                    <div class="col-auto">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="flexAdmin">
-                            <label class="form-check-label" for="flexAdmin">Is Admin</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="update_user();">Save changes</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- <div id="addretailer" class="modal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Retailer</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="selType" class="form-label">Email address</label>
+                    <label for="selType" class="form-label">Gender</label>
                     <select class="form-select" id="selType">
-                        <option value="Single">Single</option>
-                        <option value="Multiple">Multiple</option>
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label for="txtName" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="txtName" placeholder="Retailer Name">
-                </div>
-                <div class="mb-3">
-                    <label for="txtwebsite" class="form-label">Website</label>
-                    <input type="text" class="form-control" id="txtwebsite" placeholder="website address">
-                </div>
-                <div class="mb-3">
-                    <label for="txtdescription" class="form-label">Description</label>
-                    <input type="text" class="form-control" id="txtdescription" placeholder="Description">
+                    <input type="text" class="form-control" id="txtName" placeholder="Size Name">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="add_retailer();">Save changes</button>
+                <button type="button" class="btn btn-primary" onclick="add_size();">Save changes</button>
             </div>
         </div>
     </div>
@@ -131,32 +89,35 @@
             </div>
         </div>
     </div>
-</div> -->
+</div>
 
 <script>
     var table = new Tabulator("#example-table", {
         layout: "fitColumns", //fit columns to width of table (optional)
+        movableRows: true,
+        rowHeader: { headerSort: false, resizable: false, minWidth: 30, width: 30, rowHandle: true, formatter: "handle" },
         columns: [ //Define Table Columns
-            { title: "ID", field: "users_customers_id", width: 150, visible: false },
-            { title: "is_admin", field: "is_admin", width: 150, visible: false },
-            { title: "Email", field: "user_email", width: 150, headerFilter: "input" },
-            { title: "Name", field: "full_name", headerFilter: "input" },
-            { title: "Created", field: "created_at", headerFilter: "input" },
-            { title: "Tokens", field: "user_tokens", headerFilter: "input" },
-            { title: "Scans", field: "scan_count", headerFilter: "input" },
+            { title: "ID", field: "sizes_uk_id", width: 150, visible: false },
+            { title: "system_genders_id", field: "system_genders_id", width: 150, visible: false },
+            { title: "sort", field: "sort", width: 150, visible: false },
+            { title: "gender_name", field: "gender_name", width: 150, headerFilter: "input" },
+            { title: "Name", field: "name", headerFilter: "input" },
+            { title: "status", field: "status", width: 150 },
+            { title: "grouping", field: "grouping_type", width: 150 },
         ],
     });
-
     //trigger an alert message when the row is clicked
-    table.on("rowClick", function (e, row) {
+    // table.on("rowClick", function (e, row) {
 
-        document.getElementById("hf_id").value = row.getData().users_customers_id;
+    //     document.getElementById("hf_id").value = row.getData().retailers_id;
+    //     document.getElementById("selEditType").value = row.getData().retailers_type;
+    //     document.getElementById("txtEditName").value = row.getData().name;
+    //     document.getElementById("txtEditwebsite").value = row.getData().website;
+    //     document.getElementById("txteditdescription").value = row.getData().description;
+    //     document.getElementById("selEditStatus").value = row.getData().status;
 
-        document.getElementById("txtTokens").value = row.getData().user_tokens;
-        document.getElementById("flexAdmin").checked = row.getData().is_admin;
-
-        $('#useroption').modal('show');
-    });
+    //     $('#editretailer').modal('show');
+    // });
     table.on("dataFiltered", function (filters, rows) {
         document.getElementById("lblRetCount").innerText = rows.length;
     });
@@ -171,17 +132,19 @@
                 "Content-type": 'application/json; charset=utf-8',
             },
         };
-        table.setData("/users_json");
+        table.setData("/sizes_json");
     }
 
-    async function update_user() {
-        const apiUrl = "/edit_user"; // Full Flask API URL
+    async function add_size() {
+        var allRows = table.getData(true);
+        var rowCount = allRows.length;
+
+        const apiUrl = "/add_size"; // Full Flask API URL
 
         const payload = {
-            users_customers_id: document.getElementById("hf_id").value,
-            user_tokens: document.getElementById("txtTokens").value,
-            is_admin: document.getElementById("flexAdmin").checked,
-            user_password: document.getElementById("txtPassword").value
+            system_gender_id: document.getElementById("selType").value,
+            name: document.getElementById("txtName").value,
+            status: 'Active',
         };
 
         try {
@@ -196,7 +159,42 @@
             if (response.ok) {
                 const data = await response.json();
                 // console.log("Successful:", data);
-                $('#useroption').modal('hide');
+                $('#addretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+
+    }
+    async function edit_retailer() {
+        const apiUrl = "/edit_retailer"; // Full Flask API URL
+
+        const payload = {
+            retailers_id: document.getElementById("hf_id").value,
+            retailers_type: document.getElementById("selEditType").value,
+            name: document.getElementById("txtEditName").value,
+            website: document.getElementById("txtEditwebsite").value,
+            description: document.getElementById("txteditdescription").value,
+            status: document.getElementById("selEditStatus").value,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#editretailer').modal('hide');
                 loaddata();
             } else {
                 const errorText = await response.text();
@@ -235,6 +233,21 @@
                 console.error("Network Error:", error);
             }
         }
+    }
+    async function saveOrder() {
+        data = table.getData();
+        let sortedData = data.map((row, index) => ({
+            id: row.sizes_uk_id,
+            sort: index + 1 // Assigning a new sort order
+        }));
+        console.log('posting');
+        fetch("/sizes_update_sort", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(sortedData)
+        }).then(response => response.json())
+            .then(data => console.log("Sort order updated", data))
+            .catch(error => console.error("Error updating sort order:", error));
     }
 </script>
 {% endblock %}

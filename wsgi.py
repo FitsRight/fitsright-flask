@@ -14,6 +14,7 @@ app = create_app()
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config['DEBUG'] = True
 Session(app)
 Mobility(app)
 mail = Mail(app)
@@ -23,4 +24,5 @@ mail = Mail(app)
 
 if __name__ == "__main__":
     sys.setrecursionlimit(2097152)    # adjust numbers
-    app.run()
+    # app.run()
+    app.run(debug=True)

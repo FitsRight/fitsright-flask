@@ -1,0 +1,231 @@
+{% extends "/masterpage/admin.html" %}
+{% block content %}
+<div class="mt-5 container">
+    <div class="d-flex bd-highlight">
+        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Categories</div>
+        <div class="p-2 bd-highlight">
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addcategorie"><i class="fas fa-add me-2"></i>Add</button>
+        </div>
+    </div>
+    <div id="example-table"></div>
+</div>
+
+<div id="addcategorie" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Categorie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="selGenders" class="form-label">Genders</label>
+                    <select class="form-select" id="selGenders" aria-label="Retailer">
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="txtAddName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="txtAddName" placeholder="Name">
+                </div>
+
+                <div class="mb-3">
+                    <label for="txtAdddescription" class="form-label">Description</label><br>
+                    <input type="text" class="form-control" id="txtAdddescription" placeholder="Descriptions">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="add_categorie();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Categorie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hf_id">
+                <div class="mb-3">
+                    <label for="selEditGenders" class="form-label">Genders</label>
+                    <select class="form-select" id="selEditGenders" aria-label="Retailer">
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="txtEditName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="txtEditName" placeholder="Name">
+                </div>
+
+                <div class="mb-3">
+                    <label for="txtEditdescription" class="form-label">Description</label><br>
+                    <input type="text" class="form-control" id="txtEditdescription" placeholder="Descriptions">
+                </div>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                    onclick="delete_categorie();">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="edit_categorie();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var editIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-edit'></i>";
+    };
+    var listIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-list'></i>";
+    };
+
+    var table = new Tabulator("#example-table", {
+        layout: "fitColumns", //fit columns to width of table (optional)
+        columns: [ //Define Table Columns
+            { title: "sizes_categories_id", field: "sizes_categories_id", width: 1, visible: false },
+            { title: "status", field: "status", width: 1, visible: false },
+            { title: "grouping_type", field: "grouping_type", width: 1, visible: false },
+            { title: "system_genders_id", field: "system_genders_id", width: 1, visible: false },
+            {
+                title: "Edit", formatter: editIcon, width: 80, cellClick: function (e, cell) {
+                    // alert(cell.getRow().getData().id);
+                    document.getElementById("hf_id").value = cell.getRow().getData().sizes_categories_id;
+                    document.getElementById("selEditGenders").value = cell.getRow().getData().system_genders_id;
+                    document.getElementById("txtEditName").value = cell.getRow().getData().name;
+                    document.getElementById("txtEditdescription").value = cell.getRow().getData().description;
+                    $('#editretailer').modal('show');
+                }
+            },
+            { title: "Gender", field: "gender_name", headerFilter: "input" },
+            { title: "Name", field: "name", headerFilter: "input" },
+            { title: "Description", field: "description", headerFilter: "input" },
+        ],
+    });
+
+    table.on("dataFiltered", function (filters, rows) {
+        document.getElementById("lblRetCount").innerText = rows.length;
+    });
+    $(document).ready(function () {
+        loaddata();
+    });
+
+    function loaddata() {
+        var ajaxConfig = {
+            method: "POST",
+            headers: {
+                "Content-type": 'application/json; charset=utf-8',
+            },
+        };
+        table.setData("/categories_json");
+    }
+
+    async function add_categorie() {
+        var allRows = table.getData(true);
+        var rowCount = allRows.length;
+
+        const apiUrl = "/add_categorie"; // Full Flask API URL
+
+        const payload = {
+            selGenders: document.getElementById("selGenders").value,
+            name: document.getElementById("txtAddName").value,
+            description: document.getElementById("txtAdddescription").value,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#addcategorie').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+
+    }
+    async function edit_categorie() {
+        const apiUrl = "/edit_categorie"; // Full Flask API URL
+
+        const payload = {
+            sizes_categories_id: document.getElementById("hf_id").value,
+            selGenders: document.getElementById("selEditGenders").value,
+            name: document.getElementById("txtEditName").value,
+            description: document.getElementById("txtEditdescription").value,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#editretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+    async function delete_categorie() {
+        if (confirm('Are you sure you want to delete this categorie?') == true) {
+            const apiUrl = "/delete_categorie"; // Full Flask API URL
+
+            const payload = {
+                sizes_categories_id: document.getElementById("hf_id").value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    $('#addretailer').modal('hide');
+                    loaddata();
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
+
+</script>
+{% endblock %}
