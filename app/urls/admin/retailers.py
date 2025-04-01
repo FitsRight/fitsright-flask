@@ -501,9 +501,10 @@ def promotions_json():
         bookings = db.session.execute(
             text(
                 """
-SELECT public.offers.id, public.offers.base64, public.offers.url_redirect, public.offers.retailers_id, public.retailers.name
+SELECT public.offers.id, public.offers.base64, public.offers.url_redirect, public.offers.retailers_id, public.offers.system_genders_id, public.retailers.name, public.system_genders.name as gender_name
 FROM public.offers 
 LEFT JOIN public.retailers ON public.retailers.retailers_id = public.offers.retailers_id
+INNER JOIN public.system_genders ON public.system_genders.system_genders_id = public.offers.system_genders_id
 ORDER by url_redirect ASC
 """
             )
@@ -520,7 +521,9 @@ def promotions_rows(row):
         base64=row.base64,
         url_redirect=row.url_redirect,
         retailers_id=row.retailers_id,
-        retailers_name=row.name
+        retailers_name=row.name,
+        gender_name=row.gender_name,
+        system_genders_id=row.system_genders_id
     )
 
 @retailers_url.route('/edit_offer', methods=['POST'])
@@ -532,6 +535,7 @@ def edit_offer():
         base64 = data.get('base64')
         url_redirect = data.get('url_redirect')
         retailers_id = data.get('retailers_id')
+        system_genders_id = data.get('system_genders_id')
 
         # Check if the retailer exists
         retailer = db.session.execute(
@@ -549,7 +553,8 @@ def edit_offer():
                 SET 
                     base64 = :base64,
                     url_redirect = :url_redirect,
-                    retailers_id = :retailers_id
+                    retailers_id = :retailers_id,
+                    system_genders_id = :system_genders_id
                 WHERE id = :id
                 """
             ),
@@ -557,6 +562,7 @@ def edit_offer():
                 "base64": base64,
                 "url_redirect": url_redirect,
                 "retailers_id": retailers_id,
+                "system_genders_id": system_genders_id,
                 "id": id 
             }
         )
@@ -581,20 +587,22 @@ def add_offer():
         base64 = data.get('base64')
         url_redirect = data.get('url_redirect')
         retailers_id = data.get('retailers_id')
+        system_genders_id = int(data.get('system_genders_id', 0))
 
         db.session.execute(
             text(
                 """
                     INSERT INTO public.offers(
-                    id, base64, url_redirect, retailers_id)
-                    VALUES (:id, :base64, :url_redirect, :retailers_id);
+                    id, base64, url_redirect, retailers_id, system_genders_id)
+                    VALUES (:id, :base64, :url_redirect, :retailers_id, :system_genders_id);
                 """
             ),
             {
                 "id": str(uuid.uuid4()),
                 "base64": base64,
                 "url_redirect": url_redirect,
-                "retailers_id": retailers_id
+                "retailers_id": retailers_id,
+                "system_genders_id": system_genders_id
             }
         )
 
@@ -872,6 +880,134 @@ def delete_categorie():
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
 
+@retailers_url.route('/add_location', methods=['POST'])
+def add_location():
+    try:
+        data = request.get_json()
+            
+        location_name = data.get('location_name')
+        lng = data.get('lng')
+        lat = data.get('lat')        
+        w3w = data.get('w3w')
+        location_type= data.get('location_type')
+
+        db.session.execute(
+            text(
+                """
+                    INSERT INTO public.scanner_locations(
+                    id, name, type, geolocation, what3words)
+                    VALUES (:id, :name, :type, :geolocation, :what3words);
+                """
+            ),
+            {
+                "id": str(uuid.uuid4()),
+                "name": location_name,
+                "type": location_type,
+                "geolocation": f"{lng},{lat}",
+                "what3words": w3w
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Location added successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@retailers_url.route('/locations_json', methods=['GET'])
+def locations_json():
+    try:
+        bookings = db.session.execute(
+            text(
+                """
+                SELECT * FROM public.scanner_locations
+                ORDER BY name ASC 
+                """
+            )
+        ).fetchall()
+        list_bookings = [locations_rows(r) for r in bookings]
+        return jsonify(list_bookings)
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+def locations_rows(row):
+    return dict(
+        location_id=str(row.id),
+        name=row.name,
+        type=row.type,
+        geolocation=row.geolocation,
+        what3words=row.what3words,
+    )
+
+@retailers_url.route('/edit_location', methods=['POST'])
+def edit_location():
+    try:
+        data = request.get_json()
+        # Validate required fields
+        id = data.get('location_id')
+        location_name = data.get('location_name')
+        lng = data.get('lng')
+        lat = data.get('lat')        
+        w3w = data.get('w3w')
+        location_type= data.get('location_type')
+
+        db.session.execute(
+        text(
+                """
+                UPDATE public.scanner_locations
+                SET 
+                    name = :name,
+                    type = :type,
+                    geolocation = :geolocation,
+                    what3words = :what3words
+                WHERE id = :id
+                """
+            ),
+            {
+                "name": location_name,
+                "type": location_type,
+                "geolocation": f"{lng},{lat}",
+                "what3words": w3w,
+                "id": id 
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Categorie updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+
+@retailers_url.route('/delete_location', methods=['POST'])
+def delete_location():
+    try:
+        data = request.get_json()
+        location_id = data.get('location_id')
+
+        db.session.execute(
+            text(
+                """
+                    DELETE FROM public.scanner_locations WHERE id = :location_id;
+                """
+            ),
+            {
+                "location_id": location_id,
+            }
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Location deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
 
 
 

@@ -20,6 +20,13 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
+                    <label for="selGender" class="form-label">Gender</label>
+                    <select class="form-select" id="selGender">
+                        <option value="1" selected>Male</option>
+                        <option value="2">Female</option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="txtAddURL" class="form-label">URL</label>
                     <input type="text" class="form-control" id="txtAddURL" placeholder="URL Name">
                 </div>
@@ -32,9 +39,10 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3 text-center">
                     <label for="txtAddwebsite" class="form-label">Image</label><br>
-                    <img id="imgAddImage" src="" alt="Image" class="img-fluid">
+                    <img id="imgAddImage" src="" alt="Image" class="img-fluid border border-2 border-dark rounded-3"
+                        width:"373px" height="172px">
                     <input type="file" id="fileInputAdd" accept="image/*" style="display: none;">
                 </div>
             </div>
@@ -56,6 +64,13 @@
             <div class="modal-body">
                 <input type="hidden" id="hf_id">
                 <div class="mb-3">
+                    <label for="selGenderEdit" class="form-label">Gender</label>
+                    <select class="form-select" id="selGenderEdit">
+                        <option value="1" selected>Male</option>
+                        <option value="2">Female</option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="txtEditURL" class="form-label">URL</label>
                     <input type="text" class="form-control" id="txtEditURL" placeholder="Retailer Name">
                 </div>
@@ -68,9 +83,10 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="mb-3">
+                <div class="mb-3 text-center">
                     <label for="txtEditwebsite" class="form-label">Image</label><br>
-                    <img id="imgEditImage" src="" alt="Image" class="img-fluid">
+                    <img id="imgEditImage" src="" alt="Image" class="img-fluid border border-2 border-dark rounded-3"
+                        width:"373px" height="172px">
                     <input type="file" id="fileInput" accept="image/*" style="display: none;">
                     <!-- <input type="text" class="form-control" id="txtEditwebsite" placeholder="website address"> -->
                 </div>
@@ -100,16 +116,11 @@
             { title: "ID", field: "id", width: 1, visible: false },
             { title: "base64", field: "base64", width: 1, visible: false },
             { title: "retailers_id", field: "retailers_id", width: 1, visible: false },
+            { title: "system_genders_id", field: "system_genders_id", width: 1, visible: false },
             {
-                title: "Edit", formatter: editIcon, width: 80, cellClick: function (e, cell) {
-                    // alert(cell.getRow().getData().id);
-                    document.getElementById("hf_id").value = cell.getRow().getData().id;
-                    document.getElementById("imgEditImage").src = "data:image/png;base64," + cell.getRow().getData().base64;
-                    document.getElementById("selEditRetailer").value = cell.getRow().getData().retailers_id;
-                    document.getElementById("txtEditURL").value = cell.getRow().getData().url_redirect;
-                    $('#editretailer').modal('show');
-                }
+                title: "Edit", formatter: editIcon, width: 80
             },
+            { title: "Gender", field: "gender_name", headerFilter: "input" },
             { title: "Retailer", field: "retailers_name", headerFilter: "input" },
             { title: "URL", field: "url_redirect", headerFilter: "input" },
         ],
@@ -118,6 +129,17 @@
     table.on("dataFiltered", function (filters, rows) {
         document.getElementById("lblRetCount").innerText = rows.length;
     });
+
+    table.on("rowClick", function (e, row) {
+        document.getElementById("hf_id").value = row.getData().id;
+        document.getElementById("imgEditImage").src = "data:image/png;base64," + row.getData().base64;
+        document.getElementById("selEditRetailer").value = row.getData().retailers_id;
+        document.getElementById("txtEditURL").value = row.getData().url_redirect;
+        document.getElementById("selGenderEdit").value = row.getData().system_genders_id;
+        $('#editretailer').modal('show');
+    });
+
+
     $(document).ready(function () {
         loaddata();
     });
@@ -179,6 +201,7 @@
             base64: document.getElementById("imgEditImage").src.replace(/^data:image\/[a-zA-Z]+;base64,/, ""),
             url_redirect: document.getElementById("txtEditURL").value,
             retailers_id: document.getElementById("selEditRetailer").value,
+            system_genders_id: document.getElementById("selGenderEdit").value,
         };
 
         try {
@@ -245,14 +268,147 @@
         fileInput.click();
     });
 
-    // Handle file selection
+    // // Handle file selection
+    // fileInput.addEventListener('change', function (event) {
+    //     if (event.target.files && event.target.files[0]) {
+    //         const reader = new FileReader();
+
+    //         reader.onload = function (e) {
+    //             // Set the image source to the loaded file
+    //             imgElement.src = e.target.result;
+    //         };
+
+    //         // Read the selected file as a data URL
+    //         reader.readAsDataURL(event.target.files[0]);
+    //     }
+    // });
+
     fileInput.addEventListener('change', function (event) {
         if (event.target.files && event.target.files[0]) {
             const reader = new FileReader();
 
             reader.onload = function (e) {
-                // Set the image source to the loaded file
-                imgElement.src = e.target.result;
+                // Create a new image object to get the original dimensions
+                const img = new Image();
+
+                // Set up what happens when the image is loaded
+                img.onload = function () {
+                    // Set your maximum dimensions
+                    const maxWidth = 373;  // Your desired max width
+                    const maxHeight = 172; // Your desired max height
+
+                    // Calculate new dimensions while maintaining aspect ratio
+                    let newWidth = img.width;
+                    let newHeight = img.height;
+
+                    // Resize if width exceeds max
+                    if (newWidth > maxWidth) {
+                        newHeight = (maxWidth / newWidth) * newHeight;
+                        newWidth = maxWidth;
+                    }
+
+                    // Check if height still exceeds max after width adjustment
+                    if (newHeight > maxHeight) {
+                        newWidth = (maxHeight / newHeight) * newWidth;
+                        newHeight = maxHeight;
+                    }
+
+                    // Create a canvas with fixed dimensions
+                    const canvas = document.createElement('canvas');
+                    const canvasWidth = maxWidth;  // Fixed canvas width
+                    const canvasHeight = maxHeight; // Fixed canvas height
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
+
+                    // Calculate position to center the image on canvas
+                    const xOffset = (canvasWidth - newWidth) / 2;
+                    const yOffset = (canvasHeight - newHeight) / 2;
+
+                    // Draw with background
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff'; // White background - change as needed
+                    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+                    // Draw the centered image
+                    ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
+
+                    // Set the image source to the resized and centered image
+                    imgElement.src = canvas.toDataURL('image/jpeg');
+
+                    // Set the image dimensions to match the canvas
+                    imgElement.style.width = canvasWidth + 'px';
+                    imgElement.style.height = canvasHeight + 'px';
+                };
+
+                // Set the source of the image object to the loaded file
+                img.src = e.target.result;
+            };
+
+            // Read the selected file as a data URL
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    });
+
+    // Handle file selection
+    fileEditInput.addEventListener('change', function (event) {
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                // Create a new image object to get the original dimensions
+                const img = new Image();
+
+                // Set up what happens when the image is loaded
+                img.onload = function () {
+                    // Set your maximum dimensions
+                    const maxWidth = 373;  // Your desired max width
+                    const maxHeight = 172; // Your desired max height
+
+                    // Calculate new dimensions while maintaining aspect ratio
+                    let newWidth = img.width;
+                    let newHeight = img.height;
+
+                    // Resize if width exceeds max
+                    if (newWidth > maxWidth) {
+                        newHeight = (maxWidth / newWidth) * newHeight;
+                        newWidth = maxWidth;
+                    }
+
+                    // Check if height still exceeds max after width adjustment
+                    if (newHeight > maxHeight) {
+                        newWidth = (maxHeight / newHeight) * newWidth;
+                        newHeight = maxHeight;
+                    }
+
+                    // Create a canvas with fixed dimensions
+                    const canvas = document.createElement('canvas');
+                    const canvasWidth = maxWidth;  // Fixed canvas width
+                    const canvasHeight = maxHeight; // Fixed canvas height
+                    canvas.width = canvasWidth;
+                    canvas.height = canvasHeight;
+
+                    // Calculate position to center the image on canvas
+                    const xOffset = (canvasWidth - newWidth) / 2;
+                    const yOffset = (canvasHeight - newHeight) / 2;
+
+                    // Draw with background
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff'; // White background - change as needed
+                    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+                    // Draw the centered image
+                    ctx.drawImage(img, xOffset, yOffset, newWidth, newHeight);
+
+                    // Set the image source to the resized and centered image
+                    imgEditElement.src = canvas.toDataURL('image/jpeg');
+
+                    // Set the image dimensions to match the canvas
+                    imgEditElement.style.width = canvasWidth + 'px';
+                    imgEditElement.style.height = canvasHeight + 'px';
+                };
+
+                // Set the source of the image object to the loaded file
+                img.src = e.target.result;
             };
 
             // Read the selected file as a data URL
@@ -262,23 +418,9 @@
 
     // Add click event to the image
     imgEditElement.addEventListener('click', function () {
-        fileAddInput.click();
+        fileEditInput.click();
     });
 
-    // Handle file selection
-    fileEditInput.addEventListener('change', function (event) {
-        if (event.target.files && event.target.files[0]) {
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-                // Set the image source to the loaded file
-                imgAddElement.src = e.target.result;
-            };
-
-            // Read the selected file as a data URL
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    });
 
     async function add_offer() {
         var allRows = table.getData(true);
@@ -288,7 +430,8 @@
 
         const payload = {
             base64: document.getElementById('imgAddImage').src.replace(/^data:image\/[a-zA-Z]+;base64,/, ""),
-            url_redirect: document.getElementById("txtAddURL").value
+            url_redirect: document.getElementById("txtAddURL").value,
+            system_genders_id: document.getElementById("selGender").value,
         };
 
         try {

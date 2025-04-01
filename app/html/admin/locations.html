@@ -1,0 +1,318 @@
+{% extends "/masterpage/admin.html" %}
+{% block content %}
+<div class="mt-5 container">
+    <div class="d-flex bd-highlight">
+        <div class="p-2 flex-grow-1 bd-highlight"><span id="lblRetCount" class="me-2"></span>Locations</div>
+        <div class="p-2 bd-highlight">
+            <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
+                data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+        </div>
+    </div>
+    <div id="example-table"></div>
+</div>
+
+<div id="addretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="txtAddName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="txtAddName" placeholder="Name">
+                </div>
+                <div class="mb-3">
+                    <label for="ddlAddType" class="form-label">Type</label>
+                    <select class="form-select" id="ddlAddType" aria-label="Location Type">
+                        <option value="F">Fixed</option>
+                        <option value="M">Mobile</option>
+                    </select>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtAddLng" class="form-label">Lng</label>
+                            <input type="number" class="form-control" id="txtAddLng" placeholder="Lng">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtAddLat" class="form-label">Lat</label>
+                            <input type="number" class="form-control" id="txtAddLat" placeholder="Lat">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="txtAddW3W" class="form-label">What 3 Words</label>
+                    <input type="text" class="form-control" id="txtAddW3W" placeholder="What 3 Words">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="add_location();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="editretailer" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Offer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hf_id">
+                <div class="mb-3">
+                    <label for="txtEditName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="txtEditName" placeholder="Name">
+                </div>
+                <div class="mb-3">
+                    <label for="ddlEditType" class="form-label">Type</label>
+                    <select class="form-select" id="ddlEditType" aria-label="Location Type">
+                        <option value="F">Fixed</option>
+                        <option value="M">Mobile</option>
+                    </select>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtEditLng" class="form-label">Lng</label>
+                            <input type="number" class="form-control" id="txtEditLng" placeholder="Lng">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="txtEditLat" class="form-label">Lat</label>
+                            <input type="number" class="form-control" id="txtEditLat" placeholder="Lat">
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="txtEditW3W" class="form-label">What 3 Words</label>
+                    <input type="text" class="form-control" id="txtEditW3W" placeholder="What 3 Words">
+                </div>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                    onclick="delete_location();">Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="edit_location();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var editIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-edit'></i>";
+    };
+    var listIcon = function (cell, formatterParams, onRendered) { //plain text value
+        return "<i class='fa fa-list'></i>";
+    };
+
+    var table = new Tabulator("#example-table", {
+        layout: "fitColumns", //fit columns to width of table (optional)
+        columns: [ //Define Table Columns
+            { title: "ID", field: "location_id", width: 1, visible: false },
+            {
+                title: "Edit", formatter: editIcon, width: 80
+            },
+            { title: "name", field: "name", headerFilter: "input" },
+            { title: "type", field: "type", headerFilter: "input" },
+            { title: "geolocation", field: "geolocation", headerFilter: "input" },
+            { title: "what3words", field: "what3words", headerFilter: "input" },
+        ],
+    });
+
+
+    table.on("dataFiltered", function (filters, rows) {
+        document.getElementById("lblRetCount").innerText = rows.length;
+    });
+
+    table.on("rowClick", function (e, row) {
+
+        const geolocation = row.getData().geolocation;
+
+        // Parse the geolocation string to extract coordinates
+        // The format is "(x,y)" where x=lng and y=lat in PostgreSQL point type
+        const coordsMatch = geolocation.match(/\(([^,]+),([^)]+)\)/);
+
+        if (coordsMatch) {
+            // coordsMatch[1] is lng, coordsMatch[2] is lat
+            const lng = coordsMatch[1];
+            const lat = coordsMatch[2];
+
+            // Fill the textboxes
+            document.getElementById("txtEditLng").value = lng;
+            document.getElementById("txtEditLat").value = lat;
+        } else {
+            console.error("Unable to parse geolocation:", geolocation);
+        }
+
+        document.getElementById("hf_id").value = row.getData().location_id;
+        document.getElementById("txtEditName").value = row.getData().name;
+        document.getElementById("txtEditW3W").value = row.getData().what3words;
+        document.getElementById("ddlEditType").value = row.getData().type;
+
+        $('#editretailer').modal('show');
+    });
+
+
+    $(document).ready(function () {
+        loaddata();
+    });
+
+    function loaddata() {
+        var ajaxConfig = {
+            method: "POST",
+            headers: {
+                "Content-type": 'application/json; charset=utf-8',
+            },
+        };
+        table.setData("/locations_json");
+    }
+
+    async function add_location() {
+        var allRows = table.getData(true);
+        var rowCount = allRows.length;
+
+        const apiUrl = "/add_location"; // Full Flask API URL
+
+        const payload = {
+            location_name: document.getElementById("txtAddName").value,
+            lng: document.getElementById("txtAddLng").value,
+            lat: document.getElementById("txtAddLat").value,
+            w3w: document.getElementById("txtAddW3W").value,
+            location_type: document.getElementById("ddlAddType").value
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#addretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+
+    }
+    async function edit_location() {
+        const apiUrl = "/edit_location"; // Full Flask API URL
+
+        const payload = {
+            location_id: document.getElementById("hf_id").value,
+            location_name: document.getElementById("txtEditName").value,
+            lng: document.getElementById("txtEditLng").value,
+            lat: document.getElementById("txtEditLat").value,
+            w3w: document.getElementById("txtEditW3W").value,
+            location_type: document.getElementById("ddlEditType").value
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // console.log("Successful:", data);
+                $('#editretailer').modal('hide');
+                loaddata();
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+    async function delete_location() {
+        if (confirm('Are you sure you want to delete this location?') == true) {
+            const apiUrl = "/delete_location"; // Full Flask API URL
+
+            const payload = {
+                location_id: document.getElementById("hf_id").value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    $('#addretailer').modal('hide');
+                    loaddata();
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
+
+    async function delete_offer() {
+        if (confirm('Are you sure you want to delete this offer?') == true) {
+            const apiUrl = "/delete_offer"; // Full Flask API URL
+
+            const payload = {
+                offer_id: document.getElementById("hf_id").value
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    $('#editretailer').modal('hide');
+                    loaddata();
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
+
+
+</script>
+{% endblock %}

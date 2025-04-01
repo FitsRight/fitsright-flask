@@ -115,6 +115,18 @@ def admin_promotions():
    else:
       return redirect('/login')
 
+@home_url.route("/admin/locations", methods=['GET','POST'])
+@login_required
+def admin_locations():
+   if current_user.is_authenticated:
+      query = text("""
+      SELECT * FROM public.scanner_locations ORDER BY id ASC 
+            """)
+      retailers = db.session.execute(query).fetchall() 
+      return render_template('/admin/locations.html', retailers=retailers)
+   else:
+      return redirect('/login')
+
 @home_url.route("/admin/users", methods=['GET','POST'])
 @login_required
 def users_retailers():
