@@ -83,18 +83,9 @@ def add_retailer():
         db.session.execute(
             text(
                 """
-                UPDATE public.retailers
-                SET 
-                    retailers_type = :retailers_type,
-                    name = :name,
-                    website = :website,
-                    image = :image,
-                    description = :description,
-                    date_modified = :date_modified,
-                    status = :status,
-                    CPC = :CPC,
-                    CPA = :CPA
-                WHERE id = :id
+                INSERT INTO public.retailers(
+                    retailers_type, name, website, image, description, date_added, date_modified, sort_order, status, cpc, cpa)
+                    VALUES (:retailers_type, :name, :website, :image, :description, :date_added, :date_modified, :sort_order, :status, :CPC, :CPA);
                 """
             ),
             {
@@ -103,11 +94,13 @@ def add_retailer():
                 "website": website,
                 "image": '',
                 "description": description,
+                "date_added": currentTime,
                 "date_modified": currentTime,
                 "status": status,
                 "id": retailers_id,
-                "CPC": CPC,
-                "CPA": CPA
+                "CPC": 0 if CPC == '' else CPC,
+                "CPA": 0 if CPA == '' else CPA,
+                "sort_order": int(0)
             }
         )
         db.session.commit()
@@ -166,8 +159,8 @@ def edit_retailer():
                 "date_modified": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "status": status,
                 "retailers_id": retailers_id ,
-                "CPC": float(CPC),
-                "CPA": float(CPA)
+                "CPC": 0 if CPC == '' else float(CPC),
+                "CPA": 0 if CPA == '' else float(CPA),
             }
         )
 
