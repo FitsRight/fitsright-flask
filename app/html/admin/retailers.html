@@ -6,6 +6,31 @@
         <div class="p-2 bd-highlight">
             <button type="button" class="btn btn-outline-success me-2" data-bs-toggle="modal"
                 data-bs-target="#addretailer"><i class="fas fa-add me-2"></i>Add</button>
+            <button type="button" class="btn btn-outline-success me-2" onclick="checkAllLinks();" data-bs-toggle="modal"
+                data-bs-target="#mdLinkChecker"><i class="fas fa-eye me-2"></i>Check Links</button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mdLinkChecker" tabindex="-1" aria-labelledby="mdLinkChecker" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Link Checker</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress" id="progress">0%</div>
+                    </div>
+                    <button type="button" class="btn btn-link float-end" style="display: none;" id="btndownloadreport"
+                        onclick="downloadErrorReport();">Download Report</button>
+                    <span id="loading" class="loading"></span>
+                    <hr>
+                    <div id="errorList">
+                        <ul id="errors"></ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="example-table"></div>
@@ -131,6 +156,7 @@
     // var listIcon = function (cell, formatterParams, onRendered) { //plain text value
     //     return "<i class='fa fa-list'></i>";
     // };
+    let errors = [];
 
     var rowMenu = function (event, row) {
         var menuItems = []
@@ -169,7 +195,7 @@
     var table = new Tabulator("#example-table", {
         layout: "fitColumns", //fit columns to width of table (optional)
         columns: [ //Define Table Columns
-            { title: "ID", field: "retailers_id", width: 150, visible: false },
+            { title: "retailers_id", field: "retailers_id", width: 150, visible: false },
             { title: "description", field: "description", width: 150, visible: false },
             { title: "status", field: "status", width: 150, visible: false },
             { title: "Type", field: "retailers_type", width: 100, headerFilter: "input" },
@@ -179,7 +205,10 @@
             { title: "CPA", field: "cpa", headerFilter: "input", width: 60, headerSort: false, hozAlign: "center" },
             { title: "Linked", field: "multiple_vendors", headerFilter: "input", width: 75, headerSort: false, hozAlign: "center" },
             { title: "Website", field: "website", headerFilter: "input" },
+            { title: "link_status", field: "link_status", headerFilter: "input", width: 75, hozAlign: "center" },
+
         ],
+        index: "retailers_id",
         rowClickMenu: rowMenu,
         rowContextMenu: rowMenu,
     });
@@ -307,5 +336,204 @@
             }
         }
     }
+
+    async function checkUrl(url) {
+        try {
+            // Create an AbortController to handle timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+            // Try direct fetch first (will usually fail due to CORS but worth trying)
+            try {
+                const response = await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return { success: true };
+            } catch (directError) {
+                // Expected to fail due to CORS - continue to proxy method
+            }
+
+            // Using a different proxy service since allorigins seems to have issues
+            // Note: You might need to set up your own proxy or use another service
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+
+            const response = await fetch(proxyUrl, {
+                method: 'HEAD',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (response.ok || response.status === 200) {
+                return { success: true };
+            } else {
+                return {
+                    success: false,
+                    error: `HTTP error: ${response.status}`
+                };
+            }
+        } catch (error) {
+            // Handle specific error types
+            if (error.name === 'AbortError') {
+                return {
+                    success: false,
+                    error: 'Request timed out after 10 seconds'
+                };
+            } else if (error.message && error.message.includes('CORS')) {
+                return {
+                    success: true,
+                    warning: 'CORS prevented direct check, but link may be valid'
+                };
+            } else {
+                return {
+                    success: false,
+                    error: error.message || 'Unknown error occurred'
+                };
+            }
+        }
+    }
+
+    // Function to safely update a row in the table
+    function safelyUpdateRow(id, updateData) {
+        try {
+            // Check if the row exists before updating
+            const row = table.getRow(id);
+            if (row) {
+                row.update(updateData);
+            } else {
+                console.warn(`Row with ID ${id} not found. Skipping update.`);
+            }
+        } catch (error) {
+            console.error(`Error updating row ${id}:`, error);
+        }
+    }
+
+    // Function to check all links in the table
+    async function checkAllLinks() {
+        const errorList = document.getElementById("errors");
+        errorList.innerHTML = "";
+        document.getElementById("errorList").style.display = "none";
+
+        const loadingElement = document.getElementById("loading");
+        loadingElement.textContent = "Checking links...";
+
+        const progressBar = document.getElementById("progressBar");
+        const progress = document.getElementById("progress");
+        progressBar.style.display = "block";
+
+        const tableData = table.getData();
+        errors = [];
+
+        for (let i = 0; i < tableData.length; i++) {
+            const row = tableData[i];
+            const website = row.website;
+
+            // Update progress
+            const percentComplete = Math.round((i / tableData.length) * 100);
+            progress.style.width = percentComplete + "%";
+            progress.textContent = percentComplete + "%";
+
+            console.log(`Checking ${row.name} ${row.retailers_id}: ${website}`);
+
+            // Skip empty URLs
+            if (!website || website.trim() === "") {
+                safelyUpdateRow(row.retailers_id, { link_status: "N/A" });
+                continue;
+            }
+
+            // Check if URL is valid format
+            let isValidUrl = false;
+            try {
+                new URL(website);
+                isValidUrl = true;
+            } catch (e) {
+                isValidUrl = false;
+            }
+
+            if (!isValidUrl) {
+                safelyUpdateRow(row.retailers_id, { link_status: "Invalid" });
+                errors.push(`${row.name} (ID: ${row.retailers_id}): Invalid URL format - ${website}`);
+                continue;
+            }
+
+            try {
+                // Update table to show checking status
+                safelyUpdateRow(row.retailers_id, { link_status: "Checking" });
+
+                // Check the URL with timeout
+                const result = await checkUrl(website);
+
+                if (result.success) {
+                    safelyUpdateRow(row.retailers_id, { link_status: "Active" });
+                    if (result.warning) {
+                        errors.push(`${row.name} (ID: ${row.retailers_id}): ${result.warning} - ${website}`);
+                    }
+                } else {
+                    safelyUpdateRow(row.retailers_id, { link_status: "Error" });
+                    errors.push(`${row.name} (ID: ${row.retailers_id}): ${result.error} - ${website}`);
+                }
+            } catch (error) {
+                safelyUpdateRow(row.retailers_id, { link_status: "Error" });
+                errors.push(`${row.name} (ID: ${row.retailers_id}): ${error.message || "Unknown error"} - ${website}`);
+            }
+
+            // Small delay to prevent overwhelming the browser
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        // Complete progress bar
+        progress.style.width = "100%";
+        progress.textContent = "100%";
+
+        // Display errors if any
+        if (errors.length > 0) {
+            document.getElementById("errorList").style.display = "block";
+            errors.forEach(error => {
+                const li = document.createElement("li");
+                li.textContent = error;
+                li.className = "error-item";
+                errorList.appendChild(li);
+            });
+            document.getElementById("btndownloadreport").style.display = "";
+        }
+
+        loadingElement.textContent = `Done. Found ${errors.length} errors.`;
+        checkButton.disabled = false;
+    }
+
+    // Function to download error report as CSV
+    function downloadErrorReport() {
+        // Create CSV content
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Retailer,ID,Error,URL\n";
+
+        errors.forEach(error => {
+            // Extract retailer name and ID from the error message
+            const match = error.match(/^(.*?) \(ID: (\d+)\): (.*?) - (.*)$/);
+            if (match) {
+                const [_, name, id, errorMsg, url] = match;
+                // Escape quotes in CSV fields
+                const escapedName = name.replace(/"/g, '""');
+                const escapedError = errorMsg.replace(/"/g, '""');
+                const escapedUrl = url.replace(/"/g, '""');
+                csvContent += `"${escapedName}","${id}","${escapedError}","${escapedUrl}"\n`;
+            } else {
+                csvContent += `"Unknown","","${error.replace(/"/g, '""')}",""\n`;
+            }
+        });
+
+        // Create download link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "link_errors_" + new Date().toISOString().slice(0, 10) + ".csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
 </script>
 {% endblock %}
