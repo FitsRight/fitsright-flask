@@ -61,6 +61,46 @@ def user_rows(row):
         is_admin=row.is_admin
     )
 
+# Flask route to handle the user login
+@users_url.route('/users_scans_json', methods=['POST'])
+def users_scans_json():
+    data = request.get_json()
+    user_id = data.get('userId')
+    
+    if not user_id:
+        return jsonify({"error": "User ID is required"}), 400
+    
+    # Execute the database query with the user_id parameter
+    users = db.session.execute(
+        text("""
+            SELECT tid, scanned_at, error_in_scan FROM public.measurements
+            WHERE users_customers_id = :users_customers_id
+            ORDER BY scanned_at DESC
+        """),
+        {"users_customers_id": user_id}
+    ).fetchall()
+    
+    # Convert the database results to a list of dictionaries for JSON serialization
+    scans_data = []
+    for i, scan in enumerate(users):
+    # Format the datetime to be compatible with HTML datetime-local input
+        scan_date = None
+        if scan.scanned_at:
+            # Truncate the microseconds to milliseconds or remove them entirely
+            scan_date = scan.scanned_at.strftime('%Y-%m-%dT%H:%M:%S')
+            # Alternative: Keep milliseconds but not microseconds
+            # scan_date = scan.scanned_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
+        
+        scans_data.append({
+            "id": i + 1,
+            "tid": scan.tid,
+            "scanDate": scan_date,
+            "error": scan.error_in_scan if hasattr(scan, 'error_in_scan') else None
+        })
+    
+    # Return the data as JSON
+    return jsonify(scans_data)
+
 
 @users_url.route('/edit_user', methods=['POST'])
 def edit_user():
@@ -111,4 +151,95 @@ def edit_user():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@users_url.route('/update_scan_date', methods=['POST'])
+def update_scan_date():
+    try:
+        data = request.get_json()
+        # Validate required fields
+        users_customers_id = data.get('userId')
+        tid = data.get('scanId')
+        scan_date = data.get('newDate')  
+
+        db.session.execute(
+            text("UPDATE public.measurements SET scanned_at = :scanned_at WHERE tid = :tid"),
+            {'scanned_at': datetime.datetime.fromisoformat(scan_date), 'tid': str(tid)}
+        )
+
+        db.session.commit()
+
+        return jsonify({"message": "Customer updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@users_url.route('/measurements_json', methods=['GET'])
+def measurements_json():
+    try:
+        measurements = db.session.execute(
+            text("""
+                SELECT * FROM public.measurements_order
+                ORDER BY display_order ASC 
+            """)
+        ).fetchall()
+        
+        measurement_data = []
+        
+        for i, measurement in enumerate(measurements):            
+            measurement_data.append({
+                "id": measurement.id,
+                "measurement_name": measurement.measurement_name,
+                "display_order": measurement.display_order,
+                "category": measurement.category,
+                "display_name": measurement.display_name,
+                "display_yn": measurement.display_yn,
+            })
+        
+        return jsonify(measurement_data)
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+  
+@users_url.route('/update_measurement', methods=['POST'])
+def update_measurement():
+    try:
+        data = request.get_json()
+        print("Received data:", data)  # Debugging line
+        if data.get('display_yn') == True:
+            d_yn = 1
+        else:
+            d_yn = 0
+
+        db.session.execute(
+                text("UPDATE public.measurements_order SET category = :category, display_name = :display_name, display_yn = :display_yn WHERE id = :id"),
+                {'category': data.get('category'), 'display_name': data.get('display_name'), 'display_yn': d_yn, 'id': data.get('id')}
+            )
+        
+        db.session.commit()
+
+        return jsonify({"message": "measurement updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@users_url.route('/update_measurement_order', methods=['POST'])
+def update_measurement_order():
+    try:
+        data = request.get_json()
+        for display_order, record_id in enumerate(data, start=1):
+            db.session.execute(
+                text("UPDATE public.measurements_order SET display_order = :display_order WHERE id = :id"),
+                {'display_order': display_order, 'id': record_id}
+            )
+        
+        db.session.commit()
+
+        return jsonify({"message": "measurement updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
 

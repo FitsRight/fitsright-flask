@@ -39,6 +39,17 @@
                         </div>
                     </div>
                 </div>
+
+                <hr>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Scan Items</h5>
+                    </div>
+                    <ul class="list-group list-group-flush" id="lstScans">
+                    </ul>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -155,6 +166,9 @@
         document.getElementById("txtTokens").value = row.getData().user_tokens;
         document.getElementById("flexAdmin").checked = row.getData().is_admin;
 
+        //load scans
+        loadscandata(row.getData().users_customers_id);
+
         $('#useroption').modal('show');
     });
     table.on("dataFiltered", function (filters, rows) {
@@ -236,5 +250,128 @@
             }
         }
     }
+
+    async function loadscandata(userId) {
+        const scansList = document.getElementById('lstScans');
+        scansList.innerHTML = `
+                    <li class="list-group-item loading">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        Loading scan data...
+                    </li>
+                `;
+        try {
+            const ajaxConfig = {
+                method: "POST",
+                headers: {
+                    "Content-Type": 'application/json; charset=utf-8',
+                },
+                body: JSON.stringify({ userId: userId })
+            };
+
+            const response = await fetch("/users_scans_json", ajaxConfig);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            scans = data; // Store the fetched data
+            renderScanList(); // Render the list with the new data
+        } catch (error) {
+            console.error("Error loading scan data:", error);
+            scansList.innerHTML = `
+                        <li class="list-group-item text-center text-danger py-4">
+                            Error loading scan data. Please try again.
+                        </li>
+                    `;
+        }
+    }
+    function renderScanList() {
+        const scansList = document.getElementById('lstScans');
+        scansList.innerHTML = '';
+
+        scans.forEach(scan => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item scan-item';
+            listItem.dataset.id = scan.id;
+
+
+            // Format the date for display
+            const dateObj = new Date(scan.scanDate);
+            const formattedDate = dateObj.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            const itemContent = `
+                        <div class="row">
+                            <div class="tid-badge small col-12">
+                                tid: ${scan.tid}
+                            </div>
+                            <div class="col-12">
+                                <div class="scan-date-label me-1">Scan Date:</div>
+                                <input type="datetime-local" class="form-control form-control-sm scan-date-edit" 
+                                    value="${scan.scanDate}" 
+                                    title="${formattedDate}">
+                            </div>
+                        </div>
+                    `;
+
+            listItem.innerHTML = itemContent;
+            scansList.appendChild(listItem);
+
+            // Add event listener for date change
+            const dateInput = listItem.querySelector('.scan-date-edit');
+            dateInput.addEventListener('change', function () {
+                updateScanDate(scan.tid, dateInput.value);
+            });
+        });
+
+        // Show message if no scans
+        if (scans.length === 0) {
+            scansList.innerHTML = '<li class="list-group-item text-center py-4">No scan items available</li>';
+        }
+    }
+
+    // Function to update scan date
+    async function updateScanDate(id, newDate) {
+        try {
+            const updateConfig = {
+                method: "POST",
+                headers: {
+                    "Content-Type": 'application/json; charset=utf-8',
+                },
+                body: JSON.stringify({
+                    userId: document.getElementById("hf_id").value,
+                    scanId: id,
+                    newDate: newDate
+                })
+            };
+
+            // You'll need to create an endpoint for updating scan dates
+            const response = await fetch("/update_scan_date", updateConfig);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            // Update the local data
+            const scanIndex = scans.findIndex(scan => scan.id === id);
+            if (scanIndex !== -1) {
+                scans[scanIndex].scanDate = newDate;
+                console.log(`Updated scan #${id} date to ${newDate}`);
+            }
+        } catch (error) {
+            console.error("Error updating scan date:", error);
+            alert("Failed to update scan date. Please try again.");
+        }
+    }
+
 </script>
 {% endblock %}
