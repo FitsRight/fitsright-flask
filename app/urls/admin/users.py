@@ -242,4 +242,47 @@ def update_measurement_order():
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
 
+@users_url.route('/standard_text_json', methods=['GET'])
+def standard_text_json():
+    try:
+        measurements = db.session.execute(
+            text("""
+                SELECT * FROM public.standard_texts
+                ORDER BY title ASC 
+            """)
+        ).fetchall()
+        
+        measurement_data = []
+        
+        for i, measurement in enumerate(measurements):            
+            measurement_data.append({
+                "id": measurement.st_id,
+                "title": measurement.title,
+                "info": measurement.info,
+            })
+        
+        return jsonify(measurement_data)
+
+    except Exception as e:
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+@users_url.route('/update_standard_text', methods=['POST'])
+def update_standard_text():
+    try:
+        data = request.get_json()
+        print("Received data:", data)  # Debugging line
+
+        db.session.execute(
+                text("UPDATE public.standard_texts SET info = :info WHERE st_id = :id"),
+                {'id': data.get('id'), 'info': data.get('info')})
+        
+        db.session.commit()
+
+        return jsonify({"message": "standard text updated successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+
 

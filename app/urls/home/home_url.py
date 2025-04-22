@@ -36,19 +36,52 @@ def home():
 
 @home_url.route("/privacy-policy/", methods=['GET','POST'])
 def privacy_policy():
-   return render_template('home/privacy_policy.html')
+   query = text("""
+      SELECT info FROM public.standard_texts
+      WHERE st_id='4e8c697f-0342-4aa2-abe2-14468d739d7e'
+      ORDER BY st_id ASC 
+         """)
+   row = db.session.execute(query).fetchone()
+   standard_text = row[0] if row else ""
+
+   return render_template('/home/privacy_policy.html', standard_text=standard_text)
 
 @home_url.route("/terms-of-service/", methods=['GET','POST'])
 def terms_of_service():
-   return render_template('home/terms_of_service.html')
+   query = text("""
+      SELECT info FROM public.standard_texts
+      WHERE st_id='ed41df63-2fdb-4626-9fac-74876183ac1c'
+      ORDER BY st_id ASC 
+         """)
+   row = db.session.execute(query).fetchone()
+   standard_text = row[0] if row else ""
+
+   return render_template('/home/terms_of_service.html', standard_text=standard_text)
 
 @home_url.route("/acceptable-use-policy/", methods=['GET','POST'])
 def acceptable_use_policy():
-   return render_template('home/acceptable_use_policy.html')
+   query = text("""
+      SELECT info FROM public.standard_texts
+      WHERE st_id='0ac2d4df-d122-4dbf-9348-0ac687dcd4f0'
+      ORDER BY st_id ASC 
+         """)
+   row = db.session.execute(query).fetchone()
+   standard_text = row[0] if row else ""
+
+   return render_template('/home/acceptable_use_policy.html', standard_text=standard_text)
 
 @home_url.route("/cookie-policy/", methods=['GET','POST'])
 def cookie_policy():
-   return render_template('home/cookie_policy.html')
+   query = text("""
+      SELECT info FROM public.standard_texts
+      WHERE st_id='542f7163-99d4-4cfd-97ca-c5e06dc84527'
+      ORDER BY st_id ASC 
+         """)
+   row = db.session.execute(query).fetchone()
+   standard_text = row[0] if row else ""
+
+   return render_template('/home/cookie_policy.html', standard_text=standard_text)
+
 
 @home_url.route("/login/", methods=['GET','POST'])
 def login():
@@ -155,5 +188,22 @@ def admin_logout():
 def users_settings():
    if current_user.is_authenticated:
       return render_template('/admin/settings.html')
+   else:
+      return redirect('/login')
+
+
+@home_url.route("/admin/measurements", methods=['GET','POST'])
+@login_required
+def measurements():
+   if current_user.is_authenticated:
+      return render_template('/admin/measurements.html')
+   else:
+      return redirect('/login')
+   
+@home_url.route("/admin/standard_text", methods=['GET','POST'])
+@login_required
+def standard_text():
+   if current_user.is_authenticated:
+      return render_template('/admin/standard_text.html')
    else:
       return redirect('/login')

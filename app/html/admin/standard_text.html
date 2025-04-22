@@ -1,0 +1,102 @@
+{% extends "/masterpage/admin.html" %}
+{% block content %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<div class="mt-5 container">
+    <div class="d-flex bd-highlight">
+        <div class="p-2 flex-grow-1 bd-highlight">
+            Standard Text
+        </div>
+    </div>
+
+    <div id="example-table"></div>
+</div>
+
+<div class="modal fade" id="mdEdit" tabindex="-1" aria-labelledby="mdEdit" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="editor" style="min-height: 400px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveText();">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="hf_id">
+
+<script>
+    var quill = new Quill('#editor', {
+        theme: 'snow'
+    });
+
+    var table = new Tabulator("#example-table", {
+        layout: "fitColumns",
+        rowHeader: { headerSort: false, resizable: false, minWidth: 30, width: 30 },
+        columns: [ //Define Table Columns
+            { title: "ID", field: "id", width: 150, visible: false },
+            { title: "info", field: "info", visible: false },
+            { title: "Title", field: "title", width: 300, headerFilter: "input", cellEdited: function (cell) { editvalues(cell.getRow().getData()); } },
+        ],
+    });
+
+    table.on("rowClick", function (e, row) {
+        document.getElementById("hf_id").value = row.getData().id;
+        quill.root.innerHTML = row.getData().info;
+        $('#mdEdit').modal('show');
+    });
+
+    $(document).ready(function () {
+        loaddata();
+    });
+
+    function loaddata() {
+        var ajaxConfig = {
+            method: "POST",
+            headers: {
+                "Content-type": 'application/json; charset=utf-8',
+            },
+        };
+        table.setData("/standard_text_json");
+    }
+
+    async function saveText() {
+        try {
+
+            const payload = {
+                id: document.getElementById("hf_id").value,
+                info: quill.root.innerHTML,
+            };
+
+            const response = await fetch("/update_standard_text", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Successful:", data);
+                $('#mdEdit').modal('hide');
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+
+</script>
+</div>
+{% endblock %}
