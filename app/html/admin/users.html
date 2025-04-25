@@ -20,6 +20,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+
+
+                <div class="mb-3">
+                    <label for="ddlStatus" class="form-label">Account Status</label>
+                    <select class="form-select" id="ddlStatus">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Deleted">Deleted</option>
+                    </select>
+                </div>
+
                 <div class="mb-3">
                     <label for="txtPassword" class="form-label">Set Password</label>
                     <input type="password" class="form-control" id="txtPassword" placeholder="Set Password">
@@ -152,6 +164,7 @@
             { title: "is_admin", field: "is_admin", width: 150, visible: false },
             { title: "Email", field: "user_email", width: 150, headerFilter: "input" },
             { title: "Name", field: "full_name", headerFilter: "input" },
+            { title: "Status", field: "status", headerFilter: "input" },
             { title: "Created", field: "created_at", headerFilter: "input" },
             { title: "Tokens", field: "user_tokens", headerFilter: "input" },
             { title: "Scans", field: "scan_count", headerFilter: "input" },
@@ -162,7 +175,7 @@
     table.on("rowClick", function (e, row) {
 
         document.getElementById("hf_id").value = row.getData().users_customers_id;
-
+        document.getElementById("ddlStatus").value = row.getData().status;
         document.getElementById("txtTokens").value = row.getData().user_tokens;
         document.getElementById("flexAdmin").checked = row.getData().is_admin;
 
@@ -195,7 +208,8 @@
             users_customers_id: document.getElementById("hf_id").value,
             user_tokens: document.getElementById("txtTokens").value,
             is_admin: document.getElementById("flexAdmin").checked,
-            user_password: document.getElementById("txtPassword").value
+            user_password: document.getElementById("txtPassword").value,
+            status: document.getElementById("ddlStatus").value
         };
 
         try {

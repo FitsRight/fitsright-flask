@@ -111,6 +111,7 @@ def edit_user():
         user_tokens = data.get('user_tokens')
         is_admin = data.get('is_admin')  
         user_password = data.get('user_password')
+        status = data.get('status')
 
         # Check if the retailer exists
         customers = db.session.execute(
@@ -125,8 +126,8 @@ def edit_user():
             
             bit_value = 1 if is_admin else 0
             db.session.execute(
-                text("UPDATE public.users_customers SET is_admin = :bit_value WHERE users_customers_id = :user_id"),
-                {'bit_value': bit_value, 'user_id': users_customers_id}
+                text("UPDATE public.users_customers SET is_admin=:bit_value, status=:status WHERE users_customers_id = :user_id"),
+                {'bit_value': bit_value, 'status':status, 'user_id': users_customers_id}
             )
 
             current_user = User.query.filter_by(users_customers_id=users_customers_id).first()
