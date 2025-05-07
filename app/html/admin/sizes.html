@@ -101,9 +101,9 @@
             { title: "system_genders_id", field: "system_genders_id", width: 150, visible: false },
             { title: "sort", field: "sort", width: 150, visible: false },
             { title: "gender_name", field: "gender_name", width: 150, headerFilter: "input" },
-            { title: "Name", field: "name", headerFilter: "input" },
-            { title: "status", field: "status", width: 150 },
-            { title: "grouping", field: "grouping_type", width: 150 },
+            { title: "Name", field: "name", headerFilter: "input", editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
+            { title: "status", field: "status", width: 150, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editor: "list", editorParams: { values: ["Active", "Inactive"], } },
+            { title: "grouping", field: "grouping_type", width: 150, editor: true, cellEdited: function (cell) { editvalues(cell.getRow().getData()); }, editorParams: { selectContents: true, } },
         ],
     });
     //trigger an alert message when the row is clicked
@@ -249,5 +249,28 @@
             .then(data => console.log("Sort order updated", data))
             .catch(error => console.error("Error updating sort order:", error));
     }
+
+    async function editvalues(rowInfo) {
+        try {
+            const response = await fetch("/update_size_info", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(rowInfo)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Successful:", data);
+            } else {
+                const errorText = await response.text();
+                console.error("Error:", errorText);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+        }
+    }
+
 </script>
 {% endblock %}

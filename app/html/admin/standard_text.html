@@ -86,7 +86,8 @@
 
             if (response.ok) {
                 const data = await response.json();
-                console.log("Successful:", data);
+                // console.log("Successful:", data);
+                loaddata();
                 $('#mdEdit').modal('hide');
             } else {
                 const errorText = await response.text();

@@ -488,6 +488,41 @@ async def sizes_update_sort():
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
 
+
+@retailers_url.post("/update_size_info")
+async def update_size_info():
+    
+    try:
+        data = request.get_json()            
+
+        db.session.execute(
+            text(
+                """
+                UPDATE public.sizes_uk
+                SET 
+                    name = :name,
+                    status = :status,
+                    grouping_type = :grouping_type
+                WHERE sizes_uk_id = :sizes_uk_id
+                """
+            ),
+            {
+                "name": data["name"],
+                "status": data["status"],
+                "grouping_type": data["grouping_type"],
+                "sizes_uk_id": data["sizes_uk_id"]
+            }
+        )
+        db.session.commit()
+
+        return {"message": "Sort order updated successfully"}
+
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+
 @retailers_url.route('/promotions_json', methods=['GET'])
 def promotions_json():
     try:
