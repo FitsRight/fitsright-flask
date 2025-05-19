@@ -175,6 +175,28 @@ def update_scan_date():
         db.session.rollback()
         return jsonify({"error": "An error occurred", "message": str(e)}), 500
 
+@users_url.route('/delete_scan', methods=['POST'])
+def delete_scan():
+    try:
+        data = request.get_json()
+        tid = data.get('tid')
+
+        if not tid:
+            return jsonify({"error": "Missing 'tid' in request body"}), 400
+
+        db.session.execute(
+            text("DELETE FROM public.measurements WHERE tid = :tid"),
+            {'tid': str(tid)}
+        )
+        db.session.commit()
+        return jsonify({"message": "Scan deleted successfully"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "An error occurred", "message": str(e)}), 500
+
+
+
 @users_url.route('/measurements_json', methods=['GET'])
 def measurements_json():
     try:

@@ -326,6 +326,7 @@
             const itemContent = `
                         <div class="row">
                             <div class="tid-badge small col-12">
+                                <button type="button" class="btn btn-sm btn-outline-danger me-2 float-end" onclick="delete_scan('${scan.tid}');" title="Delete Scan"><i class="fas fa-trash"></i></button>
                                 tid: ${scan.tid}
                             </div>
                             <div class="col-12">
@@ -387,5 +388,35 @@
         }
     }
 
+    async function delete_scan(tid) {
+        if (confirm('Are you sure you want to delete this scan?') == true) {
+            const apiUrl = "/delete_scan"; // Full Flask API URL
+
+            const payload = {
+                tid: tid
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // console.log("Successful:", data);
+                    loadscandata(document.getElementById("hf_id").value);
+                } else {
+                    const errorText = await response.text();
+                    console.error("Error:", errorText);
+                }
+            } catch (error) {
+                console.error("Network Error:", error);
+            }
+        }
+    }
 </script>
 {% endblock %}
