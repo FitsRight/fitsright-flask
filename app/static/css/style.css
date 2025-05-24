@@ -1,0 +1,636 @@
+@font-face {
+  font-family: "Dm Sans Regular";
+  src: url(/static/assets/fonts/DMSans-Regular.ttf);
+}
+
+@font-face {
+  font-family: "Dm Sans Bold";
+  src: url(/static/assets/fonts/DMSans-Bold.ttf);
+}
+
+body {
+  font-family: "Dm Sans Regular";
+  background-color: #F7F9FC;
+}
+
+.nav-link {
+  font-family: "Dm Sans Regular";
+  font-size: 16px;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  color: #0d6efd;
+}
+
+.nav-link.active {
+  background-color: #000;
+  color: #fff !important;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.btn-primary {
+  background-color: #1355FF;
+  border-color: #1355FF;
+}
+
+.btn-primary:hover {
+  background-color: #003dcc;
+  border-color: #003dcc;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, #f7f5ff, #e7e5ff);
+}
+
+.main-heading {
+  font-family: "Dm Sans Regular";
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 101%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+.sub-heading {
+  font-family: "Dm Sans Regular";
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 26px;
+  letter-spacing: 0%;
+  color: #061237;
+}
+
+.second-heading {
+  font-family: "Dm Sans Regular";
+  font-weight: 400;
+  font-size: 48px;
+  line-height: 120%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+
+}
+
+.scan-btn {
+  width: 220px;
+  height: 61px;
+  border-radius: 16px;
+  padding: 18px 16px;
+  background-color: #061237;
+  color: #fff;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.feature-card {
+  background-color: #f8f9fa;
+  font-family: "Dm Sans Regular";
+}
+
+.feature-card .head {
+  font-family: "Dm Sans Regular";
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 120%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+
+}
+
+.feature-card .text {
+  font-family: "Dm Sans Regular";
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 140%;
+  letter-spacing: 0.2px;
+  vertical-align: middle;
+  color: #424242 !important;
+}
+
+.feature-card.personal {
+  background-color: #F6FAFD;
+}
+
+.feature-card.personal .head {
+  color: #1355FF;
+}
+
+.feature-card.gyms {
+  background-color: #F2FFFC;
+}
+
+.feature-card.gyms .head {
+  color: #4ADE80;
+}
+
+.feature-card.brands {
+  background-color: #FFF8ED;
+}
+
+.feature-card.brands .head {
+  color: #FF981F;
+}
+
+.tab-container {
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid #4ADE80;
+  background-color: #4CAF5014;
+
+}
+
+.text-primary {
+  color: #1355FF !important;
+}
+
+.nav-tabs .nav-link {
+  font-family: "Dm Sans Regular";
+  font-weight: 500;
+  font-size: 16px;
+  color: #424242;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 20px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+  color: #1355FF;
+  border-bottom-color: #1355FF;
+}
+
+.tab-text h3 {
+  font-family: "Dm Sans Bold";
+  font-size: 28px;
+  color: #061237;
+}
+
+.tab-text p {
+  font-family: "Dm Sans Regular";
+  font-size: 18px;
+  color: #424242;
+  max-width: 600px;
+}
+
+.btn-light {
+  background-color: #fff;
+  color: #061237;
+  border-color: #061237;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-light:hover {
+  background-color: #1355FF;
+  color: #fff;
+  border-color: #1355FF;
+}
+
+.nav-pills .nav-link {
+  font-family: "Dm Sans Regular";
+  font-weight: 600;
+  font-size: 20px;
+  color: #061237;
+  ;
+  line-height: 140%;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 25px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+  border-radius: 0 !important;
+  /* Remove Bootstrap rounded corners */
+}
+
+.nav-pills .nav-link.active {
+  color: #061237 !important;
+  border-bottom-color: #061237;
+  background-color: transparent;
+  border-radius: 0 !important;
+}
+
+.tab-content h3 {
+  font-family: "Dm Sans Regular";
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 120%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #061237;
+}
+
+.tab-content p {
+  font-family: "Dm Sans Regular";
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 140%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #061237;
+  max-width: 600px;
+  text-align: left;
+}
+
+.tab-content a {
+  width: 220px;
+  height: 61px;
+  border-radius: 16px;
+  padding: 18px 16px;
+  background-color: #FFF;
+  color: #171F2F;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.how-it-works-section {
+  background: linear-gradient(90deg, #f5fff9, #efefff);
+}
+
+.step-box {
+  background-color: transparent;
+  border: 1px solid #EEEEEE;
+  position: relative;
+  border-radius: 8px;
+  padding: 32px 24px 24px 24px;
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.04);
+  min-height: 250px;
+}
+
+.step-box h5 {
+  font-family: "Dm Sans Regular";
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 120%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: #171F2F;
+}
+
+.step-box p {
+  font-family: "Dm Sans Regular";
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 140%;
+  letter-spacing: 0px;
+  vertical-align: middle;
+  color: #757575;
+}
+
+.step-number {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  font-family: "Dm Sans Bold";
+  font-style: italic;
+  font-size: 50px;
+  color: #d1d5db;
+  line-height: 1;
+}
+
+
+.ai-powered-section {
+  background-color: transparent;
+}
+
+.ai-heading {
+  font-family: "Dm Sans Regular";
+  font-size: 48px;
+  color: #061237;
+  line-height: 120%;
+}
+
+.ai-list span {
+  font-family: "Dm Sans Regular";
+  font-weight: 400;
+  font-size: 20px;
+  color: #061237;
+  line-height: 140%;
+}
+
+.benefits-box {
+  background-color: #f7faff;
+  border: 1px solid #e0ecff;
+}
+
+
+.benefits-box .badge {
+  background-color: #335EF714 !important;
+}
+
+.benefits-heading {
+  font-family: "Dm Sans Regular";
+  font-weight: 600;
+  font-size: 20px;
+  color: #171F2F;
+}
+
+.benefits-list {
+  font-family: "Dm Sans Regular";
+  font-size: 16px;
+  color: #171F2F;
+  line-height: 160%;
+  list-style-type: disc;
+}
+
+.benefits-subtext {
+  font-family: "Dm Sans Regular";
+  font-size: 24px;
+  color: #171F2F;
+  margin-bottom: 30px;
+}
+
+.download-text a {
+  font-size: 18px;
+}
+
+.contact-section {
+  background: #061237;
+  color: #ffffff;
+}
+
+.contact-subtext {
+  font-family: "Dm Sans Regular";
+  font-size: 18px;
+  color: #d1d5db;
+}
+
+.contact-heading {
+  font-family: "Dm Sans Regular";
+  font-size: 48px;
+  line-height: 120%;
+  color: #ffffff;
+}
+
+.input-icon-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  height: 18px;
+  opacity: 0.8;
+}
+
+.custom-input {
+  background-color: transparent;
+  border: 1px solid #5c6b8a;
+  border-radius: 8px;
+  padding: 12px 16px 12px 42px;
+  color: #ffffff;
+}
+
+.custom-input:focus {
+  background-color: transparent !important;
+  color: #FFF !important;
+}
+
+.custom-input::placeholder {
+  color: #8e9bb5;
+}
+
+.custom-textarea {
+  background-color: transparent;
+  border: 1px solid #5c6b8a;
+  border-radius: 8px;
+  padding: 16px;
+  color: #ffffff;
+}
+
+.custom-textarea:focus {
+  background-color: transparent !important;
+  color: #FFF !important;
+}
+
+.custom-textarea::placeholder {
+  color: #8e9bb5;
+}
+
+.contact-section .btn-primary {
+  background-color: #1355ff;
+  border: none;
+}
+
+.contact-section .btn-primary:hover {
+  background-color: #003dcc;
+}
+
+
+.footer-section {
+  background-color: #fff;
+}
+
+.footer-title {
+  font-family: "Dm Sans Bold";
+  font-size: 16px;
+  color: #061237;
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  font-family: "Dm Sans Regular";
+  font-size: 16px;
+  color: #171f2f;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.footer-links a:hover {
+  color: #1355ff;
+}
+
+
+/* mobile design */
+
+@media (max-width: 767.98px) {
+  .hero-section {
+    text-align: center;
+  }
+
+  .main-heading {
+    font-size: 24px;
+    line-height: 1.3;
+  }
+
+  .sub-heading {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .scan-btn {
+    display: block;
+    margin: 0 auto;
+    width: 180px;
+    height: auto;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+
+
+  .hero-section img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  section.text-center.m-4 {
+    margin: 0.5rem !important;
+    /* equals to Bootstrap m-2 */
+  }
+
+  /* Adjust heading */
+  .second-heading {
+    font-size: 24px;
+  }
+
+  /* Feature card adjustments */
+  .feature-card {
+    text-align: center;
+  }
+
+  .feature-card .head {
+    font-size: 16px;
+  }
+
+  .feature-card .text {
+    font-size: 12px;
+  }
+
+  .feature-card img {
+    height: 48px !important;
+  }
+
+  .tab-container {
+    padding: 8px;
+  }
+
+  /* Tab buttons in row with scroll */
+  .nav-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 1rem !important;
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .nav-pills::-webkit-scrollbar {
+    display: none;
+    /* Chrome */
+  }
+
+  .nav-pills .nav-item {
+    flex-shrink: 0;
+  }
+
+  .nav-pills .nav-link {
+    font-size: 16px;
+    padding: 8px 16px;
+    white-space: nowrap;
+  }
+
+  /* Heading size */
+  .second-heading {
+    font-size: 24px;
+  }
+
+  .tab-content h3 {
+    font-size: 20px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .tab-content p {
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .tab-content a {
+    font-size: 14px;
+    width: 180px;
+    height: auto;
+    padding: 12px 16px;
+  }
+
+  /* Stack content */
+  .tab-content .d-flex.flex-lg-row {
+    flex-direction: column !important;
+    text-align: center;
+  }
+
+  .tab-content img {
+    max-height: 320px !important;
+  }
+
+  .tab-content .px-5 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .step-box {
+    padding: 12px 8px 8px 8px;
+    min-height: 200px;
+  }
+
+  .step-box img {
+    height: 32px !important;
+  }
+
+  .step-box h5 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .step-box p {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .step-number {
+    font-size: 32px;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .ai-heading {
+    font-size: 24px;
+  }
+
+  .ai-list span {
+    font-size: 14px;
+  }
+
+  .benefits-list {
+    font-size: 14px !important;
+  }
+
+  .benefits-heading {
+    font-size: 16px !important;
+  }
+
+  .benefits-subtext {
+    font-size: 16px !important;
+  }
+
+  .download-text {
+    font-size: 16px !important;
+  }
+
+  .contact-heading {
+    font-size: 24px;
+  }
+
+  .contact-subtext {
+    font-size: 12px;
+  }
+}
