@@ -12,13 +12,14 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from flask_mail import Message
+from flask_mail import Mail, Message
 from sqlalchemy import desc, text, func
 import pathlib
 
 from app.models.accounts.accounts_model import User
 from app import db, login_manager
 
+mail = Mail(current_app)
 
 # Blueprint Configuration
 home_url = Blueprint(
@@ -33,6 +34,12 @@ UPLOAD_FOLDER = "app/static/uploads/"
 @home_url.route("/", methods=['GET','POST'])
 def home():
    return render_template('home/home.html')
+@home_url.route("/about_us", methods=['GET','POST'])
+def about_us():
+   return render_template('home/about_us.html')
+@home_url.route("/partners", methods=['GET','POST'])
+def partners():
+   return render_template('home/partners.html')
 
 @home_url.route("/privacy-policy/", methods=['GET','POST'])
 def privacy_policy():
@@ -207,3 +214,45 @@ def standard_text():
       return render_template('/admin/standard_text.html')
    else:
       return redirect('/login')
+
+@home_url.route('/contact', methods=['POST'])
+def contact():
+    try:
+        # Get form data
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message_content = request.form.get('message')
+        
+        # Basic validation
+        if not name or not email or not message_content:
+            flash('All fields are required!', 'error')
+            return render_template('contact.html')
+        
+        # Create email message
+        msg = Message(
+            subject=f'Contact Form Message from {name}',
+            recipients=['david@ldrisk.co.uk'],  # Where you want to receive emails
+            sender='customerservice@fitsright.co.uk',  # Explicitly set sender
+            body=f"""
+New contact form submission:
+
+Name: {name}
+Email: {email}
+Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Message:
+{message_content}
+            """,
+            reply_to=email
+        )
+        
+        # Send email
+        mail.send(msg)
+        flash('Message sent successfully! We\'ll get back to you soon.', 'success')
+        
+    except Exception as e:
+        print(f"Error sending email: {e}")
+        flash('Sorry, there was an error sending your message. Please try again.', 'error')
+    
+    return render_template('home/home.html')
+

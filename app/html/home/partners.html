@@ -1,0 +1,123 @@
+<artifacts>
+    <invoke name="artifacts">
+        <!-- <parameter name="command">create</parameter>
+        <parameter name="type">text/html</parameter>
+        <parameter name="id">retailers_js_approach</parameter>
+        <parameter name="title">Client-side JavaScript Approach</parameter> -->
+        <parameter name="content">{% extends "/masterpage/external.html" %}
+            {% block content %}
+            <title>Partners - Fits Right</title>
+            <style>
+                .retailers-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 2rem;
+                }
+
+                .retailers-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 1.5rem;
+                    margin-top: 2rem;
+                }
+
+                .retailer-card {
+                    background: white;
+                    border-radius: 8px;
+                    padding: 1.5rem;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    transition: transform 0.3s ease;
+                }
+
+                .retailer-card:hover {
+                    transform: translateY(-2px);
+                }
+
+                .retailer-name {
+                    font-size: 1.2rem;
+                    font-weight: 600;
+                    margin-bottom: 0.5rem;
+                    color: #333;
+                }
+
+                .retailer-info {
+                    color: #666;
+                    margin-bottom: 0.5rem;
+                }
+
+                .loading {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #666;
+                }
+            </style>
+            <div class="retailers-container">
+                <h1>Our Retail Partners</h1>
+                <div id="loading" class="loading">Loading retailers...</div>
+                <div id="retailers-grid" class="retailers-grid" style="display: none;"></div>
+            </div>
+            <script>
+                // Wait for DOM to be ready
+                document.addEventListener('DOMContentLoaded', function () {
+                    fetchRetailers();
+                });
+
+                function fetchRetailers() {
+                    // Call your Flask endpoint
+                    fetch('/retailers_json')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Retailers data:', data);
+                            displayRetailers(data);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching retailers:', error);
+                            document.getElementById('loading').innerHTML = 'Error loading retailers. Please try again later.';
+                        });
+                }
+
+                function displayRetailers(retailers) {
+                    const loadingDiv = document.getElementById('loading');
+                    const retailersGrid = document.getElementById('retailers-grid');
+
+                    // Hide loading message
+                    loadingDiv.style.display = 'none';
+
+                    // Show retailers grid
+                    retailersGrid.style.display = 'grid';
+
+                    // Clear existing content
+                    retailersGrid.innerHTML = '';
+
+                    // Check if retailers is an array
+                    if (!Array.isArray(retailers)) {
+                        retailers = [retailers]; // Convert single object to array
+                    }
+
+                    // Create cards for each retailer
+                    retailers.forEach(retailer => {
+                        const card = createRetailerCard(retailer);
+                        retailersGrid.appendChild(card);
+                    });
+                }
+
+                function createRetailerCard(retailer) {
+                    const card = document.createElement('div');
+                    card.className = 'retailer-card';
+
+                    card.innerHTML = `
+        <div class="retailer-name">${retailer.name || 'Unknown Retailer'}</div>
+        ${retailer.website ? `<div class="retailer-info"><a href="${retailer.website}" target="_blank">Visit Website</a></div>` : ''}
+    `;
+
+                    return card;
+                }
+            </script>
+            {% endblock %}
+        </parameter>
+    </invoke>

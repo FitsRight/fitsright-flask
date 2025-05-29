@@ -41,14 +41,14 @@
                         <li class="nav-item">
                             <a class="nav-link active text-white" href="/">Home</a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link text-dark" href="#">Pricing</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="#">Team</a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="#">About us</a>
+                            <a class="nav-link text-dark" href="/about_us">About us</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="#contact_us">Contact</a>
@@ -104,23 +104,37 @@
 
                 <!-- Right Form -->
                 <div class="col-lg-5">
-                    <form>
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+                        role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                    <form action="{{ url_for('home_url.contact') }}" method="POST">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="input-icon-wrapper">
                                     <img src="/static/assets/images/Profile.png" class="input-icon" alt="user" />
-                                    <input type="text" class="form-control custom-input" placeholder="Name" />
+                                    <input type="text" name="name" class="form-control custom-input" placeholder="Name"
+                                        required />
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="input-icon-wrapper">
                                     <img src="/static/assets/images/Message.png" class="input-icon" alt="email" />
-                                    <input type="email" class="form-control custom-input" placeholder="Email" />
+                                    <input type="email" name="email" class="form-control custom-input"
+                                        placeholder="Email" required />
                                 </div>
                             </div>
                             <div class="col-12">
-                                <textarea class="form-control custom-textarea" rows="5"
-                                    placeholder="Message"></textarea>
+                                <textarea name="message" class="form-control custom-textarea" rows="5"
+                                    placeholder="Message" required></textarea>
                             </div>
                             <div class="col-12 text-end">
                                 <button type="submit"
@@ -171,15 +185,15 @@
                             <h6 class="footer-title">About</h6>
                             <ul class="footer-links list-unstyled mt-3">
                                 <li><a href="/#service_info">Service</a></li>
-                                <li><a href="#">Pricing</a></li>
-                                <li><a href="#">Partners</a></li>
+                                <!-- <li><a href="#">Pricing</a></li> -->
+                                <li><a href="/partners">Partners</a></li>
                             </ul>
                         </div>
                         <div class="col-md-4 mb-4 mb-md-0">
                             <h6 class="footer-title">Support</h6>
                             <ul class="footer-links list-unstyled mt-3">
-                                <li><a href="#">Documentation</a></li>
-                                <li><a href="#">FAQ</a></li>
+                                <!-- <li><a href="#">Documentation</a></li>
+                                <li><a href="#">FAQ</a></li> -->
                                 <li><a href="#contact_us">Contact us</a></li>
                             </ul>
                         </div>
