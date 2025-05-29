@@ -231,7 +231,7 @@ def contact():
         # Create email message
         msg = Message(
             subject=f'Contact Form Message from {name}',
-            recipients=['david@ldrisk.co.uk'],  # Where you want to receive emails
+            recipients=['sales@fitsright.co.uk'],  # Where you want to receive emails
             sender='customerservice@fitsright.co.uk',  # Explicitly set sender
             body=f"""
 New contact form submission:
