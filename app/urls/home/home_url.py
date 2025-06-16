@@ -34,6 +34,12 @@ UPLOAD_FOLDER = "app/static/uploads/"
 @home_url.route("/", methods=['GET','POST'])
 def home():
    return render_template('home/home.html')
+
+
+@home_url.route("/webservices/app", methods=['GET','POST'])
+def qrCode():
+   return render_template('home/home.html')
+
 @home_url.route("/about_us", methods=['GET','POST'])
 def about_us():
    return render_template('home/about_us.html')
